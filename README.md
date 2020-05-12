@@ -9,7 +9,6 @@ This tool is part of a big guide about ripping Nintendo 64 models to Source Engi
 Link to the guide description on Gamebanana: 
 
 - https://gamebanana.com/tuts/13280
-- You will also find useful files that you can download
 
 Direct link to the PDF guide: 
 
@@ -24,4 +23,5 @@ Direct link to the PDF guide:
 You can find all the informations on the Gamebanana post of the map as well as on the guide:
 
 - https://gamebanana.com/tools/6797
+- You will also find useful files used in the guide that you can download
 
