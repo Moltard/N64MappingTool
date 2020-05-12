@@ -1,6 +1,6 @@
 ## Nintendo 64 Mapping Tool
 
-A GUI tool to convert WRL files to OBJ, modify OBJ, modify pictures.
+A GUI tool to convert WRL files to OBJ, modify OBJ files, modify pictures and other stuff.
 
 <img src="Images/MainGUI.jpg" width="60%" />
 
