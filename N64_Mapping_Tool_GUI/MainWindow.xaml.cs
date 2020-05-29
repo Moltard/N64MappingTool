@@ -42,7 +42,6 @@ namespace N64Application
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
             InitializeComponent();
-            ObjToSmdUpdateGUI();
             InitCopyTextures();
             InitBlackList();
             InitObjMerge();
@@ -336,6 +335,7 @@ namespace N64Application
             ObjAddMaterialsButton.IsEnabled = notEmpty;
             ObjModifyButton.IsEnabled = notEmpty;
             ObjToSmdButton.IsEnabled = notEmpty;
+            RefModelToSmdButton.IsEnabled = notEmpty;
             CopyTextureUpdateGUI();
 
         }
@@ -568,20 +568,6 @@ namespace N64Application
             return options;
         }
 
-
-        private void ObjToSmdTextureCheckbox_Changed(object sender, RoutedEventArgs e)
-        {
-            ObjToSmdUpdateGUI();
-        }
-
-        private void ObjToSmdUpdateGUI()
-        {
-            if ((bool)ObjToSmdTextureCheckbox.IsChecked)
-                ObjToSmdTextureCheckbox.ToolTip = "The model will look for vmt named like the textures";
-            else
-                ObjToSmdTextureCheckbox.ToolTip = "The model will look for vmt named like the materials";
-        }
-
         private void ObjToSmdButton_Click(object sender, RoutedEventArgs e)
         {
             var action = ActionN64.ObjToSmd;
@@ -598,6 +584,59 @@ namespace N64Application
                         if (smdOutputName != null)
                         {
                             bool success = Start.Tool(action, ObjToSmdDictionary(objFileName, smdOutputName), GetObjSmdOptions());
+                            MessagesHandler.DisplayMessageSuccessFailed(success);
+                        }
+                    }
+                    else
+                    {
+                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtension, GuiHelper.ExtensionObj);
+                        ObjBrowseBox.Focus();
+                    }
+                }
+                else
+                {
+                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
+                    ObjBrowseBox.Focus();
+                }
+            }
+            else
+            {
+                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
+                ObjBrowseBox.Focus();
+            }
+        }
+
+        //--------------------------------------
+        //------- Events Reference Model -------
+        //--------------------------------------
+
+        private Dictionary<string, string> RefModelDictionary(string objFilename, string smdOutput)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { "ObjFile", objFilename },
+                { "SmdOutput", smdOutput },
+                { "ScaleValue", RefModelScaleValueXYZ.Text }
+            };
+            return dict;
+        }
+
+        private void RefModelToSmdButton_Click(object sender, RoutedEventArgs e)
+        {
+            var action = ActionN64.RefModelSmd;
+            string objFileName = ObjBrowseBox.Text;
+            if (objFileName != string.Empty)
+            {
+                if (File.Exists(objFileName))
+                {
+                    if (FileHelper.IsFileExtension(objFileName, GuiHelper.ExtensionObj))
+                    {
+                        string directoryOutput = FileHelper.GetDirectoryName(objFileName);
+
+                        string smdOutputName = GuiHelper.SaveFileDialog(action, directoryOutput);
+                        if (smdOutputName != null)
+                        {
+                            bool success = Start.Tool(action, RefModelDictionary(objFileName, smdOutputName), 0);
                             MessagesHandler.DisplayMessageSuccessFailed(success);
                         }
                     }
@@ -1732,8 +1771,6 @@ namespace N64Application
                 MessagesHandler.DisplayMessageWarning(MessagesList.NoGameSelected);
             }
         }
-
-        
 
     }
 

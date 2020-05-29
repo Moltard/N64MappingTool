@@ -464,11 +464,40 @@
                                         <Button Name="ObjToSmdButton"  Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="ObjToSmdButton_Click">Convert to Smd</Button>
                                     </Grid>
                                     <Separator/>
-                                    <CheckBox Name="ObjToSmdTextureCheckbox" HorizontalAlignment="Center" Margin="{StaticResource MarginCheckbox}" IsChecked="False" Checked="ObjToSmdTextureCheckbox_Changed" Unchecked="ObjToSmdTextureCheckbox_Changed">Use the textures of the model</CheckBox>
+                                    <CheckBox Name="ObjToSmdTextureCheckbox" HorizontalAlignment="Center" Margin="{StaticResource MarginCheckbox}" IsChecked="False" ToolTip="If checked, the model will look for vmt files named like the textures">Use the textures of the model</CheckBox>
 
                                 </StackPanel>
                             </TabItem>
-                            
+
+                            <TabItem>
+                                <TabItem.Header>
+                                    <TextBlock Text="Reference Model"/>
+                                </TabItem.Header>
+                                <StackPanel Background="{StaticResource BG_Color}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="5*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Style="{StaticResource SubParagraphText}">
+                                            Convert a .obj file to .smd at a given scale and without any material
+                                        </TextBlock>
+                                        <Button Name="RefModelToSmdButton"  Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="RefModelToSmdButton_Click">Convert to Smd</Button>
+                                    </Grid>
+                                    <Separator/>
+
+                                    <TextBlock Style="{StaticResource BrowseText}">Select a scale</TextBlock>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="5*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="RefModelScaleValueXYZ" Style="{StaticResource BrowseBox}" Grid.Column="0">1.0</TextBox>
+                                    </Grid>
+                                    
+                                </StackPanel>
+                            </TabItem>
+
                             <TabItem>
                                 <TabItem.Header>
                                     <TextBlock Text="Copy Textures"/>

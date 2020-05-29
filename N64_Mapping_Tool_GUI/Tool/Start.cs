@@ -23,6 +23,7 @@ namespace N64Mapping.Tool
         MergeSpecObjFiles,
         CopyObjTextures,
         ObjToSmd,
+        RefModelSmd,
         FlipPicture,
         MirrorPicture,
         MakeTransparent,
@@ -48,7 +49,7 @@ namespace N64Mapping.Tool
         SmdUseTextureName = 4096,
     }
     
-    class Start
+    static class Start
     {
         /// <summary>
         /// Used to store a list of path to texture files
@@ -113,7 +114,8 @@ namespace N64Mapping.Tool
                         }
                     }
                     break;
-                case ActionN64.ObjToSmd: // Obj to Smd
+                
+                case ActionN64.ObjToSmd: //  Obj to Smd
                     if (inputs.TryGetValue("ObjFile", out objFile))
                     {
                         if (inputs.TryGetValue("SmdOutput", out string smdOutput))
@@ -125,7 +127,15 @@ namespace N64Mapping.Tool
                         }
                     }
                     break;
-
+                case ActionN64.RefModelSmd: // Obj to Smd
+                    if (inputs.TryGetValue("ObjFile", out objFile))
+                    {
+                        if (inputs.TryGetValue("SmdOutput", out string smdOutput))
+                        {
+                            return ConvertRefModelSmd(objFile, smdOutput, inputs);
+                        }
+                    }
+                    break;
                 case ActionN64.CopyObjTextures: // Copy Obj Textures
                     if (inputs.TryGetValue("ObjFile", out objFile))
                     {
@@ -418,7 +428,37 @@ namespace N64Mapping.Tool
             }
             return false;
         }
-        
+
+        private static bool ConvertRefModelSmd(string objFile, string smdOutput, Dictionary<string, string> inputs)
+        {
+            ObjData objData = ObjParser.ParseObj(objFile);
+            if (objData != null)
+            {
+                // Delete all materials
+                ObjModifier.DeleteMaterials(objData);
+
+                // Scale the model by the given value
+                double? scaleValue = null;
+                if (inputs.TryGetValue("ScaleValue", out string scaleStr))
+                {
+                    scaleValue = Helper.StringToDouble(scaleStr);
+                }
+                if (scaleValue != null)
+                {
+                    ObjModifier.UniformScale(objData, (double)scaleValue); // Scale Model
+                }
+
+                // The SMD will use a default material name for all objects
+                if (SmdExporter.WriteSmd(objData, null, smdOutput, false))
+                {
+                    return true;
+                }
+                
+            }
+            return false;
+        }
+        // ConvertRefModelSmd(objFile, smdOutput, inputs);
+
         private static bool CopyUsedTexturesObj(string objFile, string outputFolder, string textureFolder)
         {
             ObjData objData = ObjParser.ParseObj(objFile);

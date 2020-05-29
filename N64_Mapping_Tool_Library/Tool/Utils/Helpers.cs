@@ -380,6 +380,8 @@ namespace N64Library.Tool.Utils
         /// <param name="filename"></param>
         public static void SaveTextureXml(string filename, List<GameTexturesXml> gamesList)
         {
+            // TODO: Do a propper XML implementation with custom classes ?
+
             XmlDocument doc = new XmlDocument();
             
             doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", null));
@@ -457,7 +459,7 @@ namespace N64Library.Tool.Utils
         /// <param name="message"></param>
         public void Display(string message = "Time passed: ")
         {
-            Console.WriteLine(string.Format("{0}{1}",message, GetFormattedDate()));
+            Console.WriteLine(string.Format("{0}{1}", message, GetFormattedDate()));
         }
         
         public override string ToString()

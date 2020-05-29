@@ -22,7 +22,7 @@ namespace N64Application.Tool.Utils
         Image
     }
     
-    class GuiHelper
+    static class GuiHelper
     {
 
         private const string FilterWrl = "VRML files (*.wrl)|*.wrl";
@@ -87,27 +87,6 @@ namespace N64Application.Tool.Utils
             return string.Empty;
         }
 
-        /// <summary>
-        /// Return the filename depending of the current action
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        private static string GetFileNameAction(ActionN64 action)
-        {
-            switch (action)
-            {
-                case ActionN64.WrlConversion:
-                    return WrlToObjName;
-                case ActionN64.DeleteMaterials:
-                    return DeleteMaterialName;
-                case ActionN64.AddMaterials:
-                    return AddMaterialName;
-                case ActionN64.ModifyObj:
-                    return WrlToObjName;
-                default:
-                    return DefaultName;
-            }
-        }
         
         /// <summary>
         /// Open the File Browser Dialog and return the path of the selected file, null if none
@@ -206,6 +185,7 @@ namespace N64Application.Tool.Utils
                 case ActionN64.MergeObjFiles:
                     return SaveFileDialog(MergedObjName, ExtensionObj, FilterObj, directoryOutput);
                 case ActionN64.ObjToSmd:
+                case ActionN64.RefModelSmd:
                     return SaveFileDialog(ExportedSmdName, ExtensionSmd, FilterSmd, directoryOutput);
                 default:
                     return SaveFileDialog(string.Empty, string.Empty, string.Empty, directoryOutput);
