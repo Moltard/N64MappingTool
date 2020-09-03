@@ -190,20 +190,23 @@ namespace N64Library.Tool.Utils
         /// <summary>
         /// Return the list of files located in the given directory, following a specific pattern. null if error
         /// </summary>
-        /// <param name="dir"></param>
-        /// <param name="ext"></param>
+        /// <param name="dir">Directory</param>
+        /// <param name="pattern">Search pattern</param>
+        /// <param name="allDirectories">Include the subdirectories</param>
         /// <returns></returns>
-        public static List<string> GetFiles(string dir, string ext)
+        public static List<string> GetFiles(string dir, string pattern, bool allDirectories = false)
         {
             if (System.IO.Directory.Exists(dir))
             {
                 try
                 {
+                    SearchOption searchOption = !allDirectories ? 
+                        SearchOption.TopDirectoryOnly : SearchOption.AllDirectories;
                     string[] files;
-                    if (ext == null)
-                        files = Directory.GetFiles(dir);
+                    if (pattern == null)
+                        files = Directory.GetFiles(dir, ".*", searchOption);
                     else
-                        files = Directory.GetFiles(dir, ext);
+                        files = Directory.GetFiles(dir, pattern, searchOption);
                     return new List<string>(files);
                 }
                 catch { } 

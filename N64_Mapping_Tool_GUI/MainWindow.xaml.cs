@@ -322,6 +322,84 @@ namespace N64Application
             }
         }
 
+        // Wrls to Obj
+        
+        private void WrlsBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (WrlsBrowseBox.Text != string.Empty)
+                WrlsSaveButton.IsEnabled = true;
+            else
+                WrlsSaveButton.IsEnabled = false;
+        }
+
+        private void WrlsBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string folderName = GuiHelper.OpenFolderDialog();
+            if (folderName != null)
+            {
+                WrlsBrowseBox.Text = folderName;
+            }
+        }
+
+        private void WrlsDragDrop_Drop(object sender, DragEventArgs e)
+        {
+            string filePath = DragDropGetPath(e, DragDropMode.Folder);
+            if (filePath != null)
+            {
+                WrlsBrowseBox.Text = filePath;
+            }
+        }
+
+        private Dictionary<string, string> WrlsToObjDictionary(string wrlDirectory)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { "WrlDirectory", wrlDirectory }
+            };
+            return dict;
+        }
+
+        private ObjOptions GetWrlsToObjOptions()
+        {
+            ObjOptions options = new ObjOptions();
+
+            // Reverse Vertex Order
+            if ((bool)WrlsModifyVertex.IsChecked) options |= ObjOptions.ReverseVertex;
+
+            return options;
+        }
+
+        private void WrlsSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            string wrlFolder = WrlsBrowseBox.Text;
+            if (wrlFolder != string.Empty)
+            {
+                if (Directory.Exists(wrlFolder))
+                {
+                    string message = string.Format("This will convert every .wrl file in the selected directory and its subdirectories:\n{0}\nDo you confirm ?", wrlFolder);
+                    // AskYesNoQuestion
+
+                    bool resultQuestion = MessagesHandler.AskYesNoQuestion(message);
+                    if (resultQuestion)
+                    {
+                        ActionN64 action = ActionN64.WrlsConversion;
+                        bool success = Start.Tool(action, WrlsToObjDictionary(wrlFolder), GetWrlsToObjOptions());
+                        MessagesHandler.DisplayMessageSuccessFailed(success);
+                    }
+                }
+                else
+                {
+                    MessagesHandler.DisplayMessageWarning(MessagesList.DirectoryNotExists);
+                    WrlBrowseBox.Focus();
+                }
+            }
+            else
+            {
+                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
+                WrlBrowseBox.Focus();
+            }
+        }
+
         //--------------------------------------
         //--------- Events Obj Tools -----------
         //--------------------------------------
@@ -902,7 +980,7 @@ namespace N64Application
                 }
                 else
                 {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
+                    MessagesHandler.DisplayMessageWarning(MessagesList.DirectoryNotExists);
                     WrlBrowseBox.Focus();
                 }
             }
@@ -1772,6 +1850,8 @@ namespace N64Application
             }
         }
 
+
+
     }
 
     public enum DragDropMode
@@ -1797,6 +1877,10 @@ namespace N64Application
 
     public class MessagesHandler
     {
+
+        private const string MessageBoxTitle = "N64 Mapping Tool";
+
+
         private static string GetMessage(MessagesList msg)
         {
             return GetMessage(msg, string.Empty);
@@ -1830,7 +1914,25 @@ namespace N64Application
             }
         }
 
+        public static bool AskYesNoQuestion(string message)
+        {
+            return ResultMessageYesNoQuestion(DisplayYesNoQuestion(message));
+        }
 
+        public static bool ResultMessageYesNoQuestion(MessageBoxResult result)
+        {
+            if (result == MessageBoxResult.Yes)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static MessageBoxResult DisplayYesNoQuestion(string message)
+        {
+            MessageBoxResult result = MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.YesNo, MessageBoxImage.Question);
+            return result;
+        }
 
         public static void DisplayMessageWarning(MessagesList msg)
         {
@@ -1847,12 +1949,12 @@ namespace N64Application
 
         public static void DisplayMessageWarning(string message)
         {
-            MessageBox.Show(message, "N64 Mapping Tool", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         public static void DisplayMessageInformation(string message)
         {
-            MessageBox.Show(message, "N64 Mapping Tool", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public static void DisplayMessageError(MessagesList msg)
@@ -1861,7 +1963,7 @@ namespace N64Application
         }
         public static void DisplayMessageError(string message)
         {
-            MessageBox.Show(message, "N64 Mapping Tool", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         public static void DisplayMessageSuccessFailed(bool success)

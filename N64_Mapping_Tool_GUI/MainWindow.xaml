@@ -154,7 +154,7 @@
                     <TabItem.Header>
                         <TextBlock Text="Wrl To Obj"/>
                     </TabItem.Header>
-                    <StackPanel Name="WrlDragDrop" Background="{StaticResource BG_Color}" AllowDrop="True" Drop="WrlDragDrop_Drop">
+                    <StackPanel Background="{StaticResource BG_Color}">
                         <TextBlock Style="{StaticResource PageTitle}">Wrl To Obj</TextBlock>
                         <TextBlock Style="{StaticResource ParagraphText}">
                             Convert a .wrl file to .obj
@@ -162,30 +162,99 @@
 
                         <Separator Margin="{StaticResource MarginSeparator}"/>
 
-                        <TextBlock Style="{StaticResource BrowseText}">Select a wrl file</TextBlock>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="5*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Name="WrlBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="WrlBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="WrlDragDrop_Drop"/>
-                            <Button Name="WrlBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="WrlBrowseButton_Click">Browse</Button>
-                        </Grid>
+                        <TabControl Margin="5 10" BorderThickness="1" Background="{StaticResource BG_Color}">
+                            <TabItem>
+                                <TabItem.Header>
+                                    <TextBlock Text="Convert a Wrl file"/>
+                                </TabItem.Header>
+                                <StackPanel Name="WrlDragDrop" AllowDrop="True" Drop="WrlDragDrop_Drop">
+                                    <TextBlock Style="{StaticResource BrowseText}">Select a wrl file</TextBlock>
 
-                        <!--Reverse Vertex Order-->
-                        <CheckBox Name="WrlModifyVertex" HorizontalAlignment="Center" ToolTip="Reverse every vertices of the model" Margin="{StaticResource MarginCheckbox2}">Reverse Vertex Order</CheckBox>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="5*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="WrlBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="WrlBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="WrlDragDrop_Drop"/>
+                                        <Button Name="WrlBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="WrlBrowseButton_Click">Browse</Button>
+                                    </Grid>
 
-                        <Grid Margin="{StaticResource MarginBaseGridObj}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="4*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                        </Grid>
 
-                        <Button Name="WrlSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="WrlSaveButton_Click">Convert to Obj</Button>
 
+                                    <!--Reverse Vertex Order-->
+                                    <CheckBox Name="WrlModifyVertex" HorizontalAlignment="Center" ToolTip="Reverse every vertices of the model" Margin="{StaticResource MarginCheckbox2}">Reverse Vertex Order</CheckBox>
+
+                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                    </Grid>
+
+                                    <Button Name="WrlSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="WrlSaveButton_Click">Convert to Obj</Button>
+
+
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem>
+                                <TabItem.Header>
+                                    <TextBlock Text="Convert multiple Wrl files"/>
+                                </TabItem.Header>
+                                <StackPanel Name="WrlsDragDrop" AllowDrop="True" Drop="WrlsDragDrop_Drop">
+                                    <TextBlock Style="{StaticResource BrowseText}">Select a folder</TextBlock>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="5*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="WrlsBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="WrlsBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="WrlsDragDrop_Drop"
+                                                 ToolTip="It will convert every .wrl files in this folder and subfolders" />
+                                        <Button Name="WrlsBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="WrlsBrowseButton_Click">Browse</Button>
+                                    </Grid>
+
+
+
+                                    <!--Reverse Vertex Order-->
+                                    <CheckBox Name="WrlsModifyVertex" HorizontalAlignment="Center" ToolTip="Reverse every vertices of the model" Margin="{StaticResource MarginCheckbox2}">Reverse Vertex Order</CheckBox>
+
+                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                    </Grid>
+
+                                    <Button Name="WrlsSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="WrlsSaveButton_Click">Convert to Obj</Button>
+
+
+                                </StackPanel>
+                            </TabItem>
+
+                            <!--
+                            <TextBlock Style="{StaticResource BrowseText}">Select a folder</TextBlock>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="5*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="MergeObjFolderBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="MergeObjFolderBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="MergeObjFolderBrowseBox_PreviewDrop"/>
+                                        <Button Name="MergeObjFolderBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="MergeObjFolderBrowseButton_Click">Browse</Button>
+                                    </Grid>
+
+                                    <Button Name="MergeObjFolderSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="MergeObjFolderSaveButton_Click">Merge Obj Files</Button>
+
+                            -->
+
+                        </TabControl>
+
+
+
+         
                     </StackPanel>
                 </TabItem>
 

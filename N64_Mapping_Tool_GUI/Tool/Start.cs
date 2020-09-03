@@ -15,6 +15,7 @@ namespace N64Mapping.Tool
     enum ActionN64
     {
         WrlConversion,
+        WrlsConversion,
         DeleteMaterials,
         DeleteUnusedMaterials,
         AddMaterials,
@@ -62,7 +63,6 @@ namespace N64Mapping.Tool
         internal static List<string> objFileList = new List<string>();
 
 
-
         public static bool Tool(ActionN64 action, Dictionary<string,string> inputs, ObjOptions objOptions)
         {
             string objOutput = null;
@@ -77,6 +77,14 @@ namespace N64Mapping.Tool
                         }
                     }
                     break;
+                case ActionN64.WrlsConversion: // Convert Wrl files to Obj
+                    if (inputs.TryGetValue("WrlDirectory", out string wrlDirectory))
+                    {
+                        return ConvertWrlsToObj(wrlDirectory, objOptions);
+                    }
+                    break;
+
+
                 case ActionN64.DeleteMaterials: // Delete Obj Materials
                     if (inputs.TryGetValue("ObjFile", out string objFile))
                     {
@@ -241,6 +249,22 @@ namespace N64Mapping.Tool
                 }
             }
             return false;
+        }
+
+        private static bool ConvertWrlsToObj(string directory, ObjOptions objOptions)
+        {
+            List<string> wrlList = FileHelper.GetFiles(directory, "*.wrl", true);
+            foreach (string wrlFile in wrlList) {
+                string wrlDirectory = FileHelper.GetDirectoryName(wrlFile);
+                string wrlFilenameNoExt = FileHelper.GetFileNameWithoutExtension(wrlFile);
+                string objOutput = FileHelper.Combine(wrlDirectory, wrlFilenameNoExt + ".obj");
+
+                if (!ConvertWrlToObj(wrlFile, objOutput, objOptions))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private static bool DeleteMaterialsObj(string objFile, string objOutput)
