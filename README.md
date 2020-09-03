@@ -16,7 +16,7 @@ Direct link to the PDF guide:
 
 ## Download
 
-[N64MappingTool Current Version](https://github.com/Moltard/N64MappingTool/releases/latest)
+[N64MappingTool v1.3](https://github.com/Moltard/N64MappingTool/releases/latest)
 
 ## How to use
 
