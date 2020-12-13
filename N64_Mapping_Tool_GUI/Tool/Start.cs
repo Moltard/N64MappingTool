@@ -3,34 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//using N64Library.Tool.WrlFiles;
-using N64Library.Tool.ObjFiles;
+using N64Application.Tool.Utils;
+using N64Library.Tool.Exporter;
+using N64Library.Tool.Data;
+using N64Library.Tool.Modifier;
+using N64Library.Tool.Parser;
 using N64Library.Tool.Utils;
-using N64Library.Tool.SmdFiles;
-using N64Library.Tool.WrlFiles;
 
-namespace N64Mapping.Tool
+namespace N64Application.Tool
 {
-
-    enum ActionN64
-    {
-        WrlConversion,
-        WrlsConversion,
-        DeleteMaterials,
-        DeleteUnusedMaterials,
-        AddMaterials,
-        ModifyObj,
-        MergeObjFiles,
-        MergeSpecObjFiles,
-        CopyObjTextures,
-        ObjToSmd,
-        RefModelSmd,
-        FlipPicture,
-        MirrorPicture,
-        MakeTransparent,
-        CopyBlacklistTextures,
-        NegativePicture,
-    }
 
     [Flags]
     enum ObjOptions
@@ -42,12 +23,16 @@ namespace N64Mapping.Tool
         NonUniformScale = 16,
         Rotate = 32,
         BlackList = 64,
-        CopyUseTextureDir = 128,
-        FlipHorizontally = 256,
-        FlipVertically = 512,
-        MirrorHorizontally = 1024,
-        MirrorVertically = 2048,
-        SmdUseTextureName = 4096,
+        SmdUseTextureName = 128
+    }
+
+    [Flags]
+    enum PictureOptions
+    {
+        FlipHorizontally = 1,
+        FlipVertically = 2,
+        MirrorHorizontally = 4,
+        MirrorVertically = 8
     }
     
     static class Start
@@ -62,275 +47,331 @@ namespace N64Mapping.Tool
         /// </summary>
         internal static List<string> objFileList = new List<string>();
 
-
-        public static bool Tool(ActionN64 action, Dictionary<string,string> inputs, ObjOptions objOptions)
+        public static ToolResult ToolObj(ActionN64 action, Dictionary<string, string> inputs)
         {
-            string objOutput = null;
+            return ToolObj(action, inputs, 0);
+        }
+
+        public static ToolResult ToolObj(ActionN64 action, Dictionary<string,string> inputs, ObjOptions objOptions)
+        {
+            string outputFile = null;
             switch (action)
             {
                 case ActionN64.WrlConversion: // Convert Wrl to Obj
-                    if (inputs.TryGetValue("WrlFile", out string wrlFile))
+                    if (inputs.TryGetValue(DictConstants.WrlFile, out string wrlFile))
                     {
-                        if (inputs.TryGetValue("ObjOutput", out objOutput))
+                        if (inputs.TryGetValue(DictConstants.ObjOutput, out outputFile))
                         {
-                            return ConvertWrlToObj(wrlFile, objOutput, objOptions);
+                            return ConvertWrlToObj(wrlFile, outputFile, objOptions);
                         }
                     }
                     break;
                 case ActionN64.WrlsConversion: // Convert Wrl files to Obj
-                    if (inputs.TryGetValue("WrlDirectory", out string wrlDirectory))
+                    if (inputs.TryGetValue(DictConstants.WrlDirectory, out string wrlDirectory))
                     {
                         return ConvertWrlsToObj(wrlDirectory, objOptions);
                     }
                     break;
-
-
+                    
                 case ActionN64.DeleteMaterials: // Delete Obj Materials
-                    if (inputs.TryGetValue("ObjFile", out string objFile))
+                    if (inputs.TryGetValue(DictConstants.ObjFile, out string objFile))
                     {
-                        if (inputs.TryGetValue("ObjOutput", out objOutput))
+                        if (inputs.TryGetValue(DictConstants.ObjOutput, out outputFile))
                         {
-                            return DeleteMaterialsObj(objFile, objOutput);
+                            return DeleteMaterialsObj(objFile, outputFile);
                         }
                     }
                     break;
                 case ActionN64.DeleteUnusedMaterials: // Delete Unused Obj Materials
-                    if (inputs.TryGetValue("ObjFile", out objFile))
+                    if (inputs.TryGetValue(DictConstants.ObjFile, out objFile))
                     {
-                        if (inputs.TryGetValue("ObjOutput", out objOutput))
+                        if (inputs.TryGetValue(DictConstants.ObjOutput, out outputFile))
                         {
-                            return DeleteUnusedMaterialsObj(objFile, objOutput);
+                            return DeleteUnusedMaterialsObj(objFile, outputFile);
                         }
                     }
                     break;
 
                 case ActionN64.AddMaterials: // Add Obj Materials
-                    if (inputs.TryGetValue("ObjFile", out objFile))
+                    if (inputs.TryGetValue(DictConstants.ObjFile, out objFile))
                     {
-                        if (inputs.TryGetValue("ObjOutput", out objOutput))
+                        if (inputs.TryGetValue(DictConstants.ObjOutput, out outputFile))
                         {
-                            return AddMaterialsObj(objFile, objOutput);
+                            return AddMaterialsObj(objFile, outputFile);
                         }
                     }
                     break;
                 case ActionN64.ModifyObj: // Modify Obj
-                    if (inputs.TryGetValue("ObjFile", out objFile))
+                    if (inputs.TryGetValue(DictConstants.ObjFile, out objFile))
                     {
-                        if (inputs.TryGetValue("ObjOutput", out objOutput))
+                        if (inputs.TryGetValue(DictConstants.ObjOutput, out outputFile))
                         {
-                            return ModifyObj(objFile, objOutput, objOptions, inputs);
+                            return ModifyObj(objFile, outputFile, objOptions, inputs);
                         }
                     }
                     break;
-                
-                case ActionN64.ObjToSmd: //  Obj to Smd
-                    if (inputs.TryGetValue("ObjFile", out objFile))
+                case ActionN64.ObjToSmd: // Obj to Smd
+                    if (inputs.TryGetValue(DictConstants.ObjFile, out objFile))
                     {
-                        if (inputs.TryGetValue("SmdOutput", out string smdOutput))
+                        if (inputs.TryGetValue(DictConstants.SmdOutput, out outputFile))
                         {
-                            if (objOptions.HasFlag(ObjOptions.SmdUseTextureName))
-                                return ConvertObjToSmd(objFile, smdOutput, true);
-                            else
-                                return ConvertObjToSmd(objFile, smdOutput, false);
+                            bool useTextureName = objOptions.HasFlag(ObjOptions.SmdUseTextureName);
+                            return ConvertObjToSmd(objFile, outputFile, useTextureName);
                         }
                     }
                     break;
-                case ActionN64.RefModelSmd: // Obj to Smd
-                    if (inputs.TryGetValue("ObjFile", out objFile))
+                case ActionN64.RefModelSmd: // Reference Model
+                    if (inputs.TryGetValue(DictConstants.ObjFile, out objFile))
                     {
-                        if (inputs.TryGetValue("SmdOutput", out string smdOutput))
+                        if (inputs.TryGetValue(DictConstants.SmdOutput, out outputFile))
                         {
-                            return ConvertRefModelSmd(objFile, smdOutput, inputs);
+                            return ConvertRefModelSmd(objFile, outputFile, inputs);
                         }
                     }
                     break;
+                case ActionN64.MergeObjFilesDirectory: // Merge Obj Files in a Directory
+                    if (inputs.TryGetValue(DictConstants.ObjDirectory, out string objDirectory))
+                    {
+                        if (inputs.TryGetValue(DictConstants.ObjOutput, out outputFile))
+                        {
+                            return MergeObjFiles(objDirectory, outputFile);
+                        }
+                    }
+                    break;
+                case ActionN64.MergeObjFilesList: // Merge Obj Files in a List
+                    if (inputs.TryGetValue(DictConstants.ObjOutput, out outputFile))
+                    {
+                        return MergeObjFiles(objFileList, outputFile);
+                    }
+                    break;
+            }
+            return new ToolResult(ToolResultEnum.DefaultError);
+        }
+
+        public static ToolResult ToolPictures(ActionN64 action, Dictionary<string, string> inputs)
+        {
+            return ToolPictures(action, inputs, 0);
+        }
+
+        public static ToolResult ToolPictures(ActionN64 action, Dictionary<string, string> inputs, PictureOptions pictureOptions)
+        {
+            switch (action)
+            {
                 case ActionN64.CopyObjTextures: // Copy Obj Textures
-                    if (inputs.TryGetValue("ObjFile", out objFile))
+                    if (inputs.TryGetValue(DictConstants.ObjFile, out string objFile))
                     {
-                        if (inputs.TryGetValue("DestDir", out string destDir))
+                        if (inputs.TryGetValue(DictConstants.OutputDirectory, out string destDir))
                         {
-                            if (objOptions.HasFlag(ObjOptions.CopyUseTextureDir))
+                            if (inputs.TryGetValue(DictConstants.TextureDir, out string textureDir))
                             {
-                                if (inputs.TryGetValue("TextureDir", out string textureDir))
-                                {
-                                    return CopyUsedTexturesObj(objFile, destDir, textureDir);
-                                }
-                            }
-                            else
-                            {
-                                return CopyUsedTexturesObj(objFile, destDir, null);
+                                return CopyUsedTexturesObj(objFile, destDir, textureDir);
                             }
                         }
                     }
                     break;
-                case ActionN64.MergeObjFiles: // Merge Obj Files in a folder
-                    if (inputs.TryGetValue("ObjDir", out string objFolder))
+
+                case ActionN64.FlipTexture: // Flip a picture
+                    if (inputs.TryGetValue(DictConstants.PictureFile, out string pictureFile))
                     {
-                        if (inputs.TryGetValue("ObjOutput", out objOutput))
+                        if (inputs.TryGetValue(DictConstants.PictureOutput, out string outputFile))
                         {
-                            return MergeObjFiles(objFolder, objOutput);
+                            bool horizontal = pictureOptions.HasFlag(PictureOptions.FlipHorizontally);
+                            bool vertical = pictureOptions.HasFlag(PictureOptions.FlipVertically);
+                            return FlipTexture(pictureFile, outputFile, horizontal, vertical);
                         }
                     }
                     break;
 
-                case ActionN64.MergeSpecObjFiles: // Merge specific Obj Files
-                    if (inputs.TryGetValue("ObjOutput", out objOutput))
+                case ActionN64.MirrorTexture: // Mirror a picture
+                    if (inputs.TryGetValue(DictConstants.PictureFile, out pictureFile))
                     {
-                        return MergeObjFiles(objFileList, objOutput);
-                    }
-                    break;
-
-                case ActionN64.FlipPicture: // Flip a picture
-                    if (inputs.TryGetValue("PictureFile", out string pictureFile))
-                    {
-                        if (inputs.TryGetValue("PictureOutput", out string outputFile))
+                        if (inputs.TryGetValue(DictConstants.PictureOutput, out string outputFile))
                         {
-                            return FlipTexture(pictureFile, outputFile, objOptions);
-                        }
-                    }
-                    break;
-
-                case ActionN64.MirrorPicture: // Mirror a picture
-                    if (inputs.TryGetValue("PictureFile", out pictureFile))
-                    {
-                        if (inputs.TryGetValue("PictureOutput", out string outputFile))
-                        {
-                            return MirrorTexture(pictureFile, outputFile, objOptions);
+                            bool horizontal = pictureOptions.HasFlag(PictureOptions.MirrorHorizontally);
+                            bool vertical = pictureOptions.HasFlag(PictureOptions.MirrorVertically);
+                            return MirrorTexture(pictureFile, outputFile, horizontal, vertical);
                         }
                     }
                     break;
 
                 case ActionN64.MakeTransparent: // Create a transparent picture
-                    if (inputs.TryGetValue("AlphaFile", out string alphaFile))
+                    if (inputs.TryGetValue(DictConstants.AlphaFile, out string alphaFile))
                     {
-                        if (inputs.TryGetValue("TextureFile", out string textureFile))
+                        if (inputs.TryGetValue(DictConstants.TextureFile, out string textureFile))
                         {
-                            if (inputs.TryGetValue("PictureOutput", out string outputFile))
+                            if (inputs.TryGetValue(DictConstants.PictureOutput, out string outputFile))
                             {
                                 return MakeTransparent(alphaFile, textureFile, outputFile);
                             }
                         }
                     }
                     break;
-                case ActionN64.CopyBlacklistTextures: // Copy BlackListed Textures
-                    if (inputs.TryGetValue("OutputFolder", out string outputFolder))
+
+                case ActionN64.NegativePicture: // Create a negative picture
+                    if (inputs.TryGetValue(DictConstants.PictureFile, out pictureFile))
                     {
-                        return CopyTexturesBlacklist(outputFolder);
-                    }
-                    break;
-                case ActionN64.NegativePicture: // Copy BlackListed Textures
-                    if (inputs.TryGetValue("PictureFile", out pictureFile))
-                    {
-                        if (inputs.TryGetValue("PictureOutput", out string outputFile))
+                        if (inputs.TryGetValue(DictConstants.PictureOutput, out string outputFile))
                         {
                             return NegativePicture(pictureFile, outputFile);
                         }
                     }
                     break;
 
-
+                case ActionN64.CopyBlacklistTextures: // Copy BlackListed Textures
+                    if (inputs.TryGetValue(DictConstants.OutputDirectory, out string outputDirectory))
+                    {
+                        return CopyTexturesBlacklist(outputDirectory);
+                    }
+                    break;
             }
-            return false;
+            return new ToolResult(ToolResultEnum.DefaultError);
         }
 
-        private static bool ConvertWrlToObj(string wrlFile, string objOutput, ObjOptions objOptions)
+        private static ToolResult ConvertWrlToObj(string wrlFile, string objOutput, ObjOptions objOptions)
         {
-            WrlData wrlData = WrlParser.ParseWrl(wrlFile);
+            bool success = false;
+            string message = "";
+            WrlData wrlData = WrlParser.TryParseWrl(wrlFile);
             if (wrlData != null)
             {
                 if (objOptions.HasFlag(ObjOptions.ReverseVertex))
                 {
                     WrlModifier.ReverseVertexOrder(wrlData);
                 }
-
-                if (WrlExporter.WriteObj(wrlData, objOutput))
-                {
-                    return true;
-                }
+                success = WrlExporter.WriteObj(wrlData, objOutput);
+                message = MessageBoxConstants.GetMessageExecutionCreation(success, objOutput);
             }
-            return false;
+            else
+            {
+                message = MessageBoxConstants.GetMessageExecutionErrorParse(wrlFile);
+            }
+            return new ToolResult(message, success);
         }
 
-        private static bool ConvertWrlsToObj(string directory, ObjOptions objOptions)
+        private static ToolResult ConvertWrlsToObj(string directory, ObjOptions objOptions)
         {
-            List<string> wrlList = FileHelper.GetFiles(directory, "*.wrl", true);
+            StringBuilder sb = new StringBuilder();
+            int count = 0;
+            int error = 0;
+            List<string> wrlList = FileUtils.GetFiles(directory, FileConstants.PatternExtensionWrl, true);
             foreach (string wrlFile in wrlList) {
-                string wrlDirectory = FileHelper.GetDirectoryName(wrlFile);
-                string wrlFilenameNoExt = FileHelper.GetFileNameWithoutExtension(wrlFile);
-                string objOutput = FileHelper.Combine(wrlDirectory, wrlFilenameNoExt + ".obj");
-
-                if (!ConvertWrlToObj(wrlFile, objOutput, objOptions))
-                {
-                    return false;
-                }
+                string wrlDirectory = System.IO.Path.GetDirectoryName(wrlFile);
+                string wrlFilenameNoExt = System.IO.Path.GetFileNameWithoutExtension(wrlFile);
+                string objOutput = System.IO.Path.Combine(wrlDirectory, wrlFilenameNoExt + ".obj");
+                ToolResult result = ConvertWrlToObj(wrlFile, objOutput, objOptions);
+                if (result.Success)
+                    count++;
+                else
+                    error++;
             }
-            return true;
+            string aa = $"error{ ((error>0) ? "" :" " )}";
+            bool success = false;
+            bool warn = false;
+            if (error > 0)
+            {
+                warn = true;
+                // Add a 's' to 'error' if there are more than one error
+                sb.AppendLine($"{error} error{( error > 1 ? "s" : "") } converting wrl files");
+            }
+            if (count > 0)
+            {
+                success = true;
+            }
+            sb.Append($"Converted {count}/{wrlList.Count} wrl files located in '{directory}' and its subdirectories");
+            return new ToolResult(sb.ToString(), success, warn);
         }
 
-        private static bool DeleteMaterialsObj(string objFile, string objOutput)
+        private static ToolResult DeleteMaterialsObj(string objFile, string objOutput)
         {
-            ObjData objData = ObjParser.ParseObj(objFile);
+            bool success = false;
+            string message = "";
+            ObjData objData = ObjParser.TryParseObj(objFile);
             if (objData != null)
             {
                 ObjModifier.DeleteMaterials(objData);
-                if (ObjExporter.WriteObj(objData, null, objOutput, makeMtl: false, useExistingMtl: false))
-                {
-                    return true;
-                }
+                success = ObjExporter.WriteObj(objData, null, objOutput, makeMtl: false, useExistingMtl: false);
+                message = MessageBoxConstants.GetMessageExecutionCreation(success, objOutput);
             }
-            return false;
+            else
+            {
+                message = MessageBoxConstants.GetMessageExecutionErrorParse(objFile);
+            }
+            return new ToolResult(message, success);
         }
 
-        private static bool DeleteUnusedMaterialsObj(string objFile, string objOutput)
+        private static ToolResult DeleteUnusedMaterialsObj(string objFile, string objOutput)
         {
-            ObjData objData = ObjParser.ParseObj(objFile);
+            bool success = false;
+            string message = "";
+            ObjData objData = ObjParser.TryParseObj(objFile);
             if (objData != null)
             {
                 objData.UpdateMtlData();
                 MtlData mtlData = objData.Mtl;
-
                 if (mtlData != null)
                 {
                     ObjModifier.DeleteUnusedMaterials(objData, mtlData);
-                    if (ObjExporter.WriteObj(objData, mtlData, objOutput, makeMtl: true, useExistingMtl: true))
-                    {
-                        return true;
-                    }
+                    success = ObjExporter.WriteObj(objData, mtlData, objOutput, makeMtl: true, useExistingMtl: true);
+                    message = MessageBoxConstants.GetMessageExecutionCreation(success, objOutput);
+                }
+                else
+                {
+                    message = MessageBoxConstants.MessageErrorDeleteUnusedMaterials + 
+                        MessageBoxConstants.MessageMtlNotFound;
                 }
             }
-            return false;
+            else
+            {
+                message = MessageBoxConstants.GetMessageExecutionErrorParse(objFile);
+            }
+            return new ToolResult(message, success);
         }
 
-        private static bool AddMaterialsObj(string objFile, string objOutput)
+        private static ToolResult AddMaterialsObj(string objFile, string objOutput)
         {
-            ObjData objData = ObjParser.ParseObj(objFile);
+            bool success = false;
+            string message = "";
+            ObjData objData = ObjParser.TryParseObj(objFile);
             if (objData != null)
             {
                 ObjModifier.ParseTextures(objData);
                 ObjModifier.CalculateNormal(objData);
-                if (ObjExporter.WriteObj(objData, null, objOutput, makeMtl: true, useExistingMtl: false))
-                {
-                    return true;
-                }
+                success = ObjExporter.WriteObj(objData, null, objOutput, makeMtl: true, useExistingMtl: false);
+                message = MessageBoxConstants.GetMessageExecutionCreation(success, objOutput);
             }
-            return false;
+            else
+            {
+                message = MessageBoxConstants.GetMessageExecutionErrorParse(objFile);
+            }
+            return new ToolResult(message, success);
         }
-
-
-        private static bool ModifyObj(string objFile, string objOutput, ObjOptions objOptions, Dictionary<string, string> inputs)
+        
+        private static ToolResult ModifyObj(string objFile, string objOutput, ObjOptions objOptions, Dictionary<string, string> inputs)
         {
-            ObjData objData = ObjParser.ParseObj(objFile);
+            bool success = false;
+            bool warn = false;
+            StringBuilder sb = new StringBuilder();
+            ObjData objData = ObjParser.TryParseObj(objFile);
             if (objData != null)
             {
                 objData.UpdateMtlData();
                 MtlData mtlData = objData.Mtl;
 
-                // Delete Objects first
-                if (mtlData != null)
+                if (objOptions.HasFlag(ObjOptions.BlackList))
                 {
-                    if (objOptions.HasFlag(ObjOptions.BlackList))
+                    // Delete Blacklisted Objects first
+                    if (mtlData != null)
                     {
-                        ObjModifier.DeleteMatchingGroups(objData, mtlData, texturesList);
+                        if (!ObjModifier.TryDeleteMatchingGroups(objData, mtlData, texturesList))
+                        {
+                            warn = true;
+                            sb.AppendLine(MessageBoxConstants.MessageErrorDeleteBlackList + MessageBoxConstants.MessageErrorExecution);
+                        }
+                    }
+                    else
+                    {
+                        warn = true;
+                        sb.AppendLine(MessageBoxConstants.MessageErrorDeleteBlackList + MessageBoxConstants.MessageMtlNotFound);
                     }
                 }
 
@@ -338,154 +379,234 @@ namespace N64Mapping.Tool
 
                 if (objOptions.HasFlag(ObjOptions.UniformScale))
                 {
-                    double? scaleValue = null;
-                    if (inputs.TryGetValue("ScaleValue", out string scaleStr))
+                    if (inputs.TryGetValue(DictConstants.ScaleValue, out string scaleStr))
                     {
-                        scaleValue = Helper.StringToDouble(scaleStr);
-                    }
-                    if (scaleValue != null)
-                    {
-                        ObjModifier.UniformScale(objData, (double)scaleValue); // Scale Model
+                        if (Double.TryParse(scaleStr, out double scaleValue))
+                        {
+                            ObjModifier.UniformScale(objData, scaleValue); // Scale Model
+                        }
+                        else
+                        {
+                            warn = true;
+                            sb.AppendLine(MessageBoxConstants.MessageErrorScale + MessageBoxConstants.MessageInvalidScaleValue);
+                        }
                     }
                 }
 
                 if (objOptions.HasFlag(ObjOptions.NonUniformScale))
                 {
-                    double? scaleValueX = null;
-                    double? scaleValueY = null;
-                    double? scaleValueZ = null;
-                    if (inputs.TryGetValue("ScaleValueX", out string scaleStr))
+                    bool isScaleValueX = false;
+                    bool isScaleValueY = false;
+                    bool isScaleValueZ = false;
+                    double scaleValueX = 0.0;
+                    double scaleValueY = 0.0;
+                    double scaleValueZ = 0.0;
+                    if (inputs.TryGetValue(DictConstants.ScaleValueX, out string scaleStr))
                     {
-                        scaleValueX = Helper.StringToDouble(scaleStr);
+                        isScaleValueX = Double.TryParse(scaleStr, out scaleValueX);
                     }
-                    if (inputs.TryGetValue("ScaleValueY", out scaleStr))
+                    if (inputs.TryGetValue(DictConstants.ScaleValueY, out scaleStr))
                     {
-                        scaleValueY = Helper.StringToDouble(scaleStr);
+                        isScaleValueY = Double.TryParse(scaleStr, out scaleValueY);
                     }
-                    if (inputs.TryGetValue("ScaleValueZ", out scaleStr))
+                    if (inputs.TryGetValue(DictConstants.ScaleValueZ, out scaleStr))
                     {
-                        scaleValueZ = Helper.StringToDouble(scaleStr);
+                        isScaleValueZ = Double.TryParse(scaleStr, out scaleValueZ);
                     }
-                    if (scaleValueX != null && scaleValueY != null && scaleValueZ != null)
+                    if (isScaleValueX && isScaleValueY && isScaleValueZ)
                     {
                         // Scale Model
-                        ObjModifier.NonUniformScale(objData, (double)scaleValueX, (double)scaleValueY, (double)scaleValueZ); 
+                        ObjModifier.NonUniformScale(objData, scaleValueX, scaleValueY, scaleValueZ);
+                    }
+                    else
+                    {
+                        warn = true;
+                        sb.AppendLine(MessageBoxConstants.MessageErrorScale + MessageBoxConstants.MessageInvalidScaleValues);
                     }
                 }
 
                 if (objOptions.HasFlag(ObjOptions.Rotate))
                 {
-                    double? angleX = null;
-                    double? angleY = null;
-                    double? angleZ = null;
-                    if (inputs.TryGetValue("RotateValueX", out string rotationStr))
+                    bool isRotateValueX = false;
+                    bool isRotateValueY = false;
+                    bool isRotateValueZ = false;
+                    double rotateValueX = 0.0;
+                    double rotateValueY = 0.0;
+                    double rotateValueZ = 0.0;
+                    if (inputs.TryGetValue(DictConstants.RotateValueX, out string rotationStr))
                     {
-                        angleX = Helper.StringToDouble(rotationStr);
+                        isRotateValueX = Double.TryParse(rotationStr, out rotateValueX);
                     }
-                    if (inputs.TryGetValue("RotateValueY", out rotationStr))
+                    if (inputs.TryGetValue(DictConstants.RotateValueY, out rotationStr))
                     {
-                        angleY = Helper.StringToDouble(rotationStr);
+                        isRotateValueY = Double.TryParse(rotationStr, out rotateValueY);
                     }
-                    if (inputs.TryGetValue("RotateValueZ", out rotationStr))
+                    if (inputs.TryGetValue(DictConstants.RotateValueZ, out rotationStr))
                     {
-                        angleZ = Helper.StringToDouble(rotationStr);
+                        isRotateValueZ = Double.TryParse(rotationStr, out rotateValueZ);
                     }
-                    if (angleX == null)
-                        angleX = 0.0;
-                    if (angleY == null)
-                        angleY = 0.0;
-                    if (angleZ == null)
-                        angleZ = 0.0;
-
-                    // Rotate Model
-                    ObjModifier.RotateModel(objData, (double)angleX, (double)angleY, (double)angleZ);
+                    if (isRotateValueX && isRotateValueY && isRotateValueZ)
+                    {
+                        // Rotate Model
+                        ObjModifier.RotateModel(objData, rotateValueX, rotateValueY, rotateValueZ);
+                    }
+                    else
+                    {
+                        warn = true;
+                        sb.AppendLine(MessageBoxConstants.MessageErrorRotate + MessageBoxConstants.MessageInvalidRotateValues);
+                    }
                 }
-                
+
                 if (objOptions.HasFlag(ObjOptions.ReverseVertex))
-                    ObjModifier.ReverseVertexOrder(objData); // Reverse Vertex Order
-                
-                
-                if (mtlData != null)
                 {
-                    if (objOptions.HasFlag(ObjOptions.Merge))
-                        ObjModifier.MergeGroups(objData, mtlData); // Merge groups and materials
-
-                    if (objOptions.HasFlag(ObjOptions.Sort))
-                        ObjModifier.SortMaterials(mtlData); // Sort materials
+                    // Reverse Vertex Order
+                    ObjModifier.ReverseVertexOrder(objData); 
                 }
 
+                if (objOptions.HasFlag(ObjOptions.Merge))
+                {
+                    if (mtlData != null)
+                    {
+                        // Merge groups and materials
+                        ObjModifier.MergeGroups(objData, mtlData);
+                    }
+                    else
+                    {
+                        warn = true;
+                        sb.AppendLine(MessageBoxConstants.MessageErrorMergeGroups + MessageBoxConstants.MessageMtlNotFound);
+                    }
+                }
                 if (objOptions.HasFlag(ObjOptions.Sort))
-                    ObjModifier.SortGroups(objData); // Sort groups
-
-
-                if (ObjExporter.WriteObj(objData, mtlData, objOutput, makeMtl: true, useExistingMtl: true))
                 {
-                    return true;
+                    // Sort groups
+                    if (!ObjModifier.SortGroups(objData))
+                    {
+                        warn = true;
+                        sb.AppendLine(MessageBoxConstants.MessageErrorSortGroups + MessageBoxConstants.MessageInvalidGroupName);
+                    }
+
+                    if (mtlData != null)
+                    {
+                        // Sort materials
+                        if (!ObjModifier.SortMaterials(mtlData))
+                        {
+                            warn = true;
+                            sb.AppendLine(MessageBoxConstants.MessageErrorSortMaterials + MessageBoxConstants.MessageInvalidMaterialName);
+                        }
+                    }
+                    else
+                    {
+                        warn = true;
+                        sb.AppendLine(MessageBoxConstants.MessageErrorSortMaterials + MessageBoxConstants.MessageMtlNotFound);
+                    }
                 }
+                success = ObjExporter.WriteObj(objData, mtlData, objOutput, makeMtl: true, useExistingMtl: true);
+                sb.Append(MessageBoxConstants.GetMessageExecutionCreation(success, objOutput));
             }
-            return false;
+            else
+            {
+                sb.Append(MessageBoxConstants.GetMessageExecutionErrorParse(objFile));
+            }
+            return new ToolResult(sb.ToString(), success, warn);
         }
 
-        private static bool ConvertObjToSmd(string objFile, string smdOutput, bool useTextureName)
+        private static ToolResult ConvertObjToSmd(string objFile, string smdOutput, bool useTextureName)
         {
-            ObjData objData = ObjParser.ParseObj(objFile);
+            bool success = false;
+            string message = "";
+            ObjData objData = ObjParser.TryParseObj(objFile);
             if (objData != null)
             {
                 objData.UpdateMtlData();
                 MtlData mtlData = objData.Mtl;
 
-                if (mtlData != null)
-                {
-                    if (SmdExporter.WriteSmd(objData, mtlData, smdOutput, useTextureName))
-                    {
-                        return true;
-                    }
-                }
-                else
+                if (mtlData == null)
                 {
                     // No MTL means the SMD will use a default material name for all objects
-                    if (SmdExporter.WriteSmd(objData, null, smdOutput, false))
-                    {
-                        return true;
-                    }
+                    useTextureName = false;
                 }
+                success = SmdExporter.WriteSmd(objData, mtlData, smdOutput, useTextureName);
+                message = MessageBoxConstants.GetMessageExecutionCreation(success, smdOutput);
             }
-            return false;
+            else
+            {
+                message = MessageBoxConstants.GetMessageExecutionErrorParse(objFile);
+            }
+            return new ToolResult(message, success);
         }
 
-        private static bool ConvertRefModelSmd(string objFile, string smdOutput, Dictionary<string, string> inputs)
+        private static ToolResult ConvertRefModelSmd(string objFile, string smdOutput, Dictionary<string, string> inputs)
         {
-            ObjData objData = ObjParser.ParseObj(objFile);
+            bool success = false;
+            bool warn = false;
+            StringBuilder sb = new StringBuilder();
+            ObjData objData = ObjParser.TryParseObj(objFile);
             if (objData != null)
             {
                 // Delete all materials
                 ObjModifier.DeleteMaterials(objData);
 
                 // Scale the model by the given value
-                double? scaleValue = null;
-                if (inputs.TryGetValue("ScaleValue", out string scaleStr))
+                if (inputs.TryGetValue(DictConstants.ScaleValue, out string scaleStr))
                 {
-                    scaleValue = Helper.StringToDouble(scaleStr);
-                }
-                if (scaleValue != null)
-                {
-                    ObjModifier.UniformScale(objData, (double)scaleValue); // Scale Model
+                    if (Double.TryParse(scaleStr, out double scaleValue))
+                    {
+                        ObjModifier.UniformScale(objData, scaleValue); // Scale Model
+                    }
+                    else
+                    {
+                        warn = true;
+                        sb.AppendLine(MessageBoxConstants.MessageErrorScale + MessageBoxConstants.MessageInvalidScaleValue);
+                    }
                 }
 
                 // The SMD will use a default material name for all objects
-                if (SmdExporter.WriteSmd(objData, null, smdOutput, false))
-                {
-                    return true;
-                }
-                
+                success = SmdExporter.WriteSmd(objData, null, smdOutput, false);
+                sb.Append(MessageBoxConstants.GetMessageExecutionCreation(success, smdOutput));
             }
-            return false;
+            else
+            {
+                sb.Append(MessageBoxConstants.GetMessageExecutionErrorParse(objFile));
+            }
+            return new ToolResult(sb.ToString(), success, warn);
         }
-        // ConvertRefModelSmd(objFile, smdOutput, inputs);
-
-        private static bool CopyUsedTexturesObj(string objFile, string outputFolder, string textureFolder)
+        
+        private static ToolResult MergeObjFiles(string objDirectory, string objOutput)
         {
-            ObjData objData = ObjParser.ParseObj(objFile);
+            return MergeObjFiles(FileUtils.GetFiles(objDirectory, FileConstants.PatternExtensionObj), objOutput);
+        }
+        
+        private static ToolResult MergeObjFiles(List<string> fileList, string objOutput)
+        {
+            bool success = false;
+            StringBuilder sb = new StringBuilder();
+            if (fileList != null)
+            {
+                List<ObjData> objDatas = ObjParser.ParseObjs(fileList);
+                ObjData objData = ObjModifier.MergeObjFiles(objDatas);
+                if (objData != null)
+                {
+                    success = ObjExporter.WriteObj(objData, objData.Mtl, objOutput, makeMtl: true, useExistingMtl: true);
+                    sb.AppendLine($"Merged {objDatas.Count} obj files into one");
+                    sb.Append(MessageBoxConstants.GetMessageExecutionCreation(success, objOutput));
+                }
+                else
+                {
+                    sb.Append(MessageBoxConstants.MessageErrorMergeObj + MessageBoxConstants.MessageErrorExecution);
+                }
+            }
+            else
+            {
+                sb.Append(MessageBoxConstants.MessageErrorMergeObj + MessageBoxConstants.MessageNoFilesMerge);
+            }
+            return new ToolResult(sb.ToString(), success);
+        }
+
+        private static ToolResult CopyUsedTexturesObj(string objFile, string outputDirectory, string textureDirectory)
+        {
+            bool success = false;
+            string message = "";
+            ObjData objData = ObjParser.TryParseObj(objFile);
             if (objData != null)
             {
                 objData.UpdateMtlData();
@@ -493,84 +614,54 @@ namespace N64Mapping.Tool
 
                 if (mtlData != null)
                 {
-                    if (ObjModifier.CopyUsedTextures(mtlData, outputFolder, textureFolder))
-                    {
-                        return true;
-                    }
+                    success = ObjModifier.CopyUsedTextures(mtlData, outputDirectory, textureDirectory);
+                    message = MessageBoxConstants.GetMessageExecutionGeneric(success);
                 }
-            }
-            return false;
-        }
-
-        private static bool MergeObjFiles(string objFolder, string objOutput)
-        {
-            return MergeObjFiles(FileHelper.GetFiles(objFolder, "*.obj"), objOutput);
-        }
-        
-        private static bool MergeObjFiles(List<string> fileList, string objOutput)
-        {
-            if (fileList != null)
-            {
-                List<ObjData> objDatas = ObjParser.ParseObjs(fileList);
-                ObjData objData = ObjModifier.MergeObjFiles(objDatas);
-                if (objData != null)
+                else
                 {
-                    if (ObjExporter.WriteObj(objData, objData.Mtl, objOutput, makeMtl: true, useExistingMtl: true))
-                    {
-                        return true;
-                    }
+                    message = MessageBoxConstants.MessageErrorCopyTextures + MessageBoxConstants.MessageMtlNotFound;
                 }
             }
-            return false;
+            else
+            {
+                message = MessageBoxConstants.GetMessageExecutionErrorParse(objFile);
+            }
+            return new ToolResult(message, success);
+        }
+
+        private static ToolResult FlipTexture(string fileName, string outputFile, bool horizontal, bool vertical)
+        {
+            bool success = ImageUtilsShared.FlipTexture(fileName, horizontal, vertical, outputFile);
+            string message = MessageBoxConstants.GetMessageExecutionCreation(success, outputFile);
+            return new ToolResult(message, success);
+        }
+
+        private static ToolResult MirrorTexture(string fileName, string outputFile, bool horizontal, bool vertical)
+        {
+            bool success = ImageUtilsShared.MirrorTexture(fileName, horizontal, vertical, outputFile);
+            string message = MessageBoxConstants.GetMessageExecutionCreation(success, outputFile);
+            return new ToolResult(message, success);
+        }
+
+        private static ToolResult MakeTransparent(string alphaFile, string textureFile, string outputFile)
+        {
+            bool success = ImageUtilsShared.MakeTransparent(alphaFile, textureFile, outputFile);
+            string message = MessageBoxConstants.GetMessageExecutionCreation(success, outputFile);
+            return new ToolResult(message, success);
+        }
+
+        private static ToolResult NegativePicture(string fileName, string outputFile)
+        {
+            bool success = ImageUtilsShared.NegativePicture(fileName, outputFile);
+            string message = MessageBoxConstants.GetMessageExecutionCreation(success, outputFile);
+            return new ToolResult(message, success);
         }
         
-        private static bool FlipTexture(string fileName, string outputFile, ObjOptions objOptions)
+        private static ToolResult CopyTexturesBlacklist(string outputDirectory)
         {
-            bool horizontal = objOptions.HasFlag(ObjOptions.FlipHorizontally) ? true: false;
-            bool vertical = objOptions.HasFlag(ObjOptions.FlipVertically) ? true : false;
-            
-            if (ImageHelper.FlipTexture(fileName, horizontal, vertical, outputFile))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private static bool MirrorTexture(string fileName, string outputFile, ObjOptions objOptions)
-        {
-            bool horizontal = objOptions.HasFlag(ObjOptions.MirrorHorizontally) ? true: false;
-            bool vertical = objOptions.HasFlag(ObjOptions.MirrorVertically) ? true : false;
-            
-            if (ImageHelper.MirrorTexture(fileName, horizontal, vertical, outputFile))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private static bool MakeTransparent(string alphaFile, string textureFile, string outputFile)
-        {
-            if (ImageHelper.MakeTransparent(alphaFile, textureFile, outputFile))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private static bool NegativePicture(string fileName, string outputFile)
-        {
-            if (ImageHelper.NegativePicture(fileName, outputFile))
-            {
-                return true;
-            }
-            return false;
-        }
-
-
-
-        private static bool CopyTexturesBlacklist(string outputFolder)
-        {
-            return FileHelper.CopyFiles(outputFolder, texturesList);
+            bool success = FileUtils.CopyFiles(outputDirectory, texturesList);
+            string message = MessageBoxConstants.GetMessageExecutionGeneric(success);
+            return new ToolResult(message, success);
         }
 
     }

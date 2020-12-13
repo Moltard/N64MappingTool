@@ -5,1151 +5,1468 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Moltard's N64 Mapping Tool" Height="500" Width="800" Icon="icon.ico"
-        MinHeight="500" MinWidth="800">
+        Title="Moltard's N64 Mapping Tool" Height="550" Width="950" Icon="icon.ico"
+        MinHeight="550" MinWidth="950" SizeToContent="Manual">
 
     <Window.Resources>
 
-        <sys:Double x:Key="WindowHeight">450</sys:Double>
+        <!--#region Strings-->
+
+        <!--#region Strings - Values-->
+
+        <sys:String x:Key="DefaultScaleValue">1.0</sys:String>
+        <sys:String x:Key="DefaultRotationValue">0.0</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Images-->
+
+        <sys:String x:Key="TextImageBase">Base Image</sys:String>
+        <sys:String x:Key="TextImageFlipHorizontally">Flip Horizontally</sys:String>
+        <sys:String x:Key="TextImageFlipVertically">Flip Vertically</sys:String>
+        <sys:String x:Key="TextImageFlipHorizontallyVertically">Flip Horizontally &amp; Vertically</sys:String>
+        <sys:String x:Key="TextImageMirrorHorizontally">Mirror Horizontally</sys:String>
+        <sys:String x:Key="TextImageMirrorVertically">Mirror Vertically</sys:String>
+        <sys:String x:Key="TextImageMirrorHorizontallyVertically">Mirror Horizontally &amp; Vertically</sys:String>
+        <sys:String x:Key="TextImageChainTexture">Texture</sys:String>
+        <sys:String x:Key="TextImageChainAlpha">Alpha</sys:String>
+        <sys:String x:Key="TextImageChainTransparent">Output</sys:String>
+        <sys:String x:Key="TextImageNegative">Negative</sys:String>
+        <sys:String x:Key="TextImageBaseBW">Base Image 2</sys:String>
+        <sys:String x:Key="TextImageNegativeBW">Negative 2</sys:String>
+
+        <BitmapImage x:Key="PathImageBase">./Images/Base_32.png</BitmapImage>
+        <BitmapImage x:Key="PathImageFlipHorizontally">./Images/Base_32_FlipHorizontally.png</BitmapImage>
+        <BitmapImage x:Key="PathImageFlipVertically">./Images/Base_32_FlipVertically.png</BitmapImage>
+        <BitmapImage x:Key="PathImageFlipHorizontallyVertically">./Images/Base_32_FlipHorizontallyVertically.png</BitmapImage>
+        <BitmapImage x:Key="PathImageMirrorHorizontally">./Images/Base_32_MirrorHorizontally.png</BitmapImage>
+        <BitmapImage x:Key="PathImageMirrorVertically">./Images/Base_32_MirrorVertically.png</BitmapImage>
+        <BitmapImage x:Key="PathImageMirrorHorizontallyVertically">./Images/Base_32_MirrorHorizontallyVertically.png</BitmapImage>
+        <BitmapImage x:Key="PathImageChainTexture">./Images/Chain_Texture.png</BitmapImage>
+        <BitmapImage x:Key="PathImageChainAlpha">./Images/Chain_Alpha.png</BitmapImage>
+        <BitmapImage x:Key="PathImageChainTransparent">./Images/Chain_Transparent.png</BitmapImage>
+        <BitmapImage x:Key="PathImageNegative">./Images/Base_32_Negative.png</BitmapImage>
+        <BitmapImage x:Key="PathImageBaseBW">./Images/Base_32_BW.png</BitmapImage>
+        <BitmapImage x:Key="PathImageNegativeBW">./Images/Base_32_BW_Negative.png</BitmapImage>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Titles-->
+
+        <sys:String x:Key="TextTitleWrlToObj">Wrl To Obj</sys:String>
+        <sys:String x:Key="TextTitleObjTools">Obj Tools</sys:String>
+        <sys:String x:Key="TextTitleCopyTextures">Copy Textures</sys:String>
+        <sys:String x:Key="TextTitleMergeObj">Merge Obj Files</sys:String>
+        <sys:String x:Key="TextTitleFlipTexture">Flip Texture</sys:String>
+        <sys:String x:Key="TextTitleMirrorTexture">Mirror Texture</sys:String>
+        <sys:String x:Key="TextTitleTransparentTexture">Texture Transparency</sys:String>
+        <sys:String x:Key="TextTitleOtherTools">Other Tools</sys:String>
+        <sys:String x:Key="TextTitleSettings">Settings</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Generic-->
+
+        <sys:String x:Key="TextLabelBrowseButton">Browse</sys:String>
+        <sys:String x:Key="TextLabelWrlFile">Wrl File</sys:String>
+        <sys:String x:Key="TextLabelObjFile">Obj File</sys:String>
+        <sys:String x:Key="TextLabelTextureFile">Texture File</sys:String>
+        <sys:String x:Key="TextLabelAlphaFile">Alpha File</sys:String>
+        <sys:String x:Key="TextLabelPicture">Picture File</sys:String>
+        <sys:String x:Key="TextLabelDirectoryPath">Directory Path</sys:String>
+        <sys:String x:Key="TextLabelScale">Scale</sys:String>
+
+        <sys:String x:Key="TextLabelButtonConvertToObj">Convert to Obj</sys:String>
+        <sys:String x:Key="TextLabelButtonConvertToSmd">Convert to Smd</sys:String>
+        <sys:String x:Key="TextLabelButtonCopyTextures">Copy Textures</sys:String>
+
+        <sys:String x:Key="TextLabelButtonAdd">Add...</sys:String>
+        <sys:String x:Key="TextLabelButtonName">Name</sys:String>
+        <sys:String x:Key="TextLabelButtonDelete">Delete</sys:String>
         
-        <SolidColorBrush x:Key="BG_Color" Color="LightGray" />
-        <Thickness x:Key="MarginColumnObj" Left="2" Top="0"/>
-        <Thickness x:Key="MarginBaseGridObj" Left="0" Top="2"/>
-        <Thickness x:Key="MarginCheckbox" Left="5" Top="5"/>
-        <Thickness x:Key="MarginCheckbox2" Left="0" Top="5"/>
-        <Thickness x:Key="MarginSeparator" Left="0" Top="2"/>
-        <sys:String x:Key="DefaultComboBox">---</sys:String>
+        <sys:String x:Key="TextLabelButtonAddFiles">Add Files</sys:String>
+        <sys:String x:Key="TextLabelButtonRemoveFiles">Remove Selected</sys:String>
+        <sys:String x:Key="TextLabelButtonSaveSettings">Save Settings</sys:String>
 
-        <Style TargetType="TextBlock" x:Key="PageTitle">
-            <Setter Property="Margin" Value="5 10 5 10"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="18"/>
+        <sys:String x:Key="TextLabelLetterX">X</sys:String>
+        <sys:String x:Key="TextLabelLetterY">Y</sys:String>
+        <sys:String x:Key="TextLabelLetterZ">Z</sys:String>
+        <sys:String x:Key="TextLabelLetterXYZ">XYZ</sys:String>
+        <sys:String x:Key="TextLabelReverseVertex">Reverse Vertex Order</sys:String>
+        <sys:String x:Key="TextTooltipReverseVertex">Reverse every vertices of the model</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Wrl To Obj-->
+
+        <sys:String x:Key="TextDescriptionWrlToObjPage">Convert wrl files to obj</sys:String>
+        <sys:String x:Key="TextHeaderWrlToObj">Convert one Wrl file</sys:String>
+        <sys:String x:Key="TextDescriptionWrlToObj">Convert one wrl file to obj</sys:String>
+        <sys:String x:Key="TextHeaderWrlsToObj">Convert multiple Wrl files</sys:String>
+        <sys:String x:Key="TextDescriptionWrlsToObj">Convert every wrl files located in the directory and its subdirectories to obj</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Obj Tools-->
+
+        <sys:String x:Key="TextDescriptionObjToolsPage">Tools related to obj files</sys:String>
+        <sys:String x:Key="TextHeaderDeleteMaterials">Delete Materials</sys:String>
+        <sys:String x:Key="TextHeaderDeleteUnusedMaterials">Delete Unused Materials</sys:String>
+        <sys:String x:Key="TextHeaderAddMaterials">Add Materials</sys:String>
+        <sys:String x:Key="TextHeaderModifyObj">Modify Obj</sys:String>
+        <sys:String x:Key="TextHeaderObjToSmd">Obj to Smd</sys:String>
+        <sys:String x:Key="TextHeaderReferenceModel">Reference Model</sys:String>
+
+        <!--#region Strings - Obj Tools - Delete/Add Materials-->
+
+        <sys:String x:Key="TextDescriptionDeleteMaterials">Delete every materials from the obj file</sys:String>
+        <sys:String x:Key="TextDescriptionDeleteUnusedMaterials">Delete every unused materials from the obj file</sys:String>
+        <TextBlock x:Key="TextBlockDescriptionAddMaterials" Style="{StaticResource ToolParagraphDescription}">
+            Automatically create materials and assign textures to each object of the obj<LineBreak/>
+            Objects names need to contain the texture name
+        </TextBlock>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Obj Tools - Modify Obj-->
+
+        <TextBlock x:Key="TextBlockDescriptionModifyObj" Style="{StaticResource ToolParagraphDescription}">
+            Modify the obj file based on your selection<LineBreak/>
+            Some options require the obj file to have an associated mtl file
+        </TextBlock>
+        <sys:String x:Key="TextLabelModifyObjMerge">Merge Groups &amp; Materials</sys:String>
+        <sys:String x:Key="TextTooltipModifyObjMerge">Merge together groups &amp; materials sharing a texture</sys:String>
+        <sys:String x:Key="TextLabelModifyObjSort">Sort Groups &amp; Materials</sys:String>
+        <sys:String x:Key="TextTooltipModifyObjSort">Sort groups &amp; materials by name alphabetically</sys:String>
+
+        <sys:String x:Key="TextLabelModifyObjScaleUni">Uniform Scaling</sys:String>
+        <sys:String x:Key="TextTooltipModifyObjScaleUni">Scale uniformly the model by the specified value</sys:String>
+        <TextBlock x:Key="TextBlockModifyObjScaleUni" Style="{StaticResource ToolListOfCheckBoxesText}" Text="{StaticResource TextLabelModifyObjScaleUni}"/>
+
+        <sys:String x:Key="TextLabelModifyObjScaleNonUni">Non Uniform Scaling</sys:String>
+        <sys:String x:Key="TextTooltipModifyObjScaleNonUni">Scale uniformly the model by the specified value</sys:String>
+        <TextBlock x:Key="TextBlockModifyObjScaleNonUni" Style="{StaticResource ToolListOfCheckBoxesText}" Text="{StaticResource TextLabelModifyObjScaleNonUni}"/>
+
+        <sys:String x:Key="TextLabelModifyObjRotate">Rotate Model</sys:String>
+        <sys:String x:Key="TextTooltipModifyObjRotate">Rotate the model by the specified values</sys:String>
+        <TextBlock x:Key="TextBlockModifyObjRotate" Style="{StaticResource ToolListOfCheckBoxesText}" Text="{StaticResource TextLabelModifyObjRotate}"/>
+
+        <sys:String x:Key="TextLabelModifyObjBlackList">Delete Objects using BlackList</sys:String>
+        <sys:String x:Key="TextTooltipModifyObjBlackList">Delete Objects that use specific textures (See Settings for more informations)</sys:String>
+        <TextBlock x:Key="TextBlockModifyObjBlackList" Style="{StaticResource ToolListOfCheckBoxesText}" Text="{StaticResource TextLabelModifyObjBlackList}"/>
+        <sys:String x:Key="TextLabelModifyObjBlackListConfig">Config</sys:String>
+        <sys:String x:Key="TextLabelModifyObjBlackListSetup">Setup BlackList</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Obj Tools - Obj to Smd/Reference Model-->
+
+        <sys:String x:Key="TextDescriptionObjToSmd">Convert a obj file to smd</sys:String>
+        <sys:String x:Key="TextDescriptionReferenceModel">Convert a obj file to smd at a given scale and without any material</sys:String>
+
+        <sys:String x:Key="TextLabelSmdUseMaterials">Use the Materials names for the VMTs</sys:String>
+        <sys:String x:Key="TextTooltipSmdUseMaterials">The compiled model will load VMTs named like the materials</sys:String>
+        <sys:String x:Key="TextLabelSmdUseTextures">Use the Textures names for the VMTs</sys:String>
+        <sys:String x:Key="TextTooltipSmdUseTextures">The compiled model will load VMTs named like the textures</sys:String>
+
+        <!--#endregion-->
+
+        <!--#endregion-->
+
+        <!--#region Strings - Copy Textures-->
+
+        <sys:String x:Key="TextLabelDirectoryOutput">Output Directory</sys:String>
+        <sys:String x:Key="TextLabelDirectoryOutputSame">Copy Textures into the Obj File Directory</sys:String>
+        <sys:String x:Key="TextLabelDirectoryTextures">Texture Directory</sys:String>
+        <sys:String x:Key="TextLabelDirectoryTexturesSpecific">Use a specific Texture Directory</sys:String>
+        <sys:String x:Key="TextTooltipDirectoryTexturesCopy">If unchecked, the tool will load textures from the paths defined in the obj and mtl files</sys:String>
+
+        <TextBlock x:Key="TextBlockDescriptionCopyTexturesPage" Style="{StaticResource ToolPageDescription}">
+           Copy every textures used by the obj file into the <TextBlock FontWeight="SemiBold" Text="{StaticResource TextLabelDirectoryOutput}"/><LineBreak/>
+            Requires the obj file to have an associated mtl file<LineBreak/>
+            If you dont specify a <TextBlock FontWeight="SemiBold" Text="{StaticResource TextLabelDirectoryTextures}"/>, it will find textures defined in the obj and mtl files
+        </TextBlock>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Flip Texture-->
+
+        <sys:String x:Key="TextDescriptionFlipTexturePage">Flip a texture horizontally and/or vertically</sys:String>
+        <sys:String x:Key="TextLabelFlipHorizontally">Flip Horizontally</sys:String>
+        <sys:String x:Key="TextLabelFlipVertically">Flip Vertically</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Mirror Texture-->
+
+        <sys:String x:Key="TextDescriptionMirrorTexturePage">Mirror a texture horizontally and/or vertically</sys:String>
+        <sys:String x:Key="TextLabelMirrorHorizontally">Mirror Horizontally</sys:String>
+        <sys:String x:Key="TextLabelMirrorVertically">Mirror Vertically</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Texture Transparency-->
+
+        <TextBlock x:Key="TextBlockDescriptionTransparencyPage" Style="{StaticResource ToolPageDescription}">
+            Create a transparent png from a texture and its alpha<LineBreak/>
+            Both textures need to be the same size<LineBreak/>
+            In the VRML dump, a texture and its alpha are called <TextBlock FontWeight="SemiBold" Text="XXXXXXXX_c.bmp" /> 
+            and <TextBlock FontWeight="SemiBold" Text="XXXXXXXX_a.bmp" />
+        </TextBlock>
+        <sys:String x:Key="TextLabelTransparencyButton">Create Transparent Png</sys:String>
+
+        <!--#endregion-->
+
+        <!--#region Strings - Merge Obj Files-->
+
+        <TextBlock x:Key="TextBlockDescriptionMergeObjPage" Style="{StaticResource ToolPageDescription}">
+            Merge multiple obj files into one<LineBreak/>
+            Give an unique name to every materials in order not to lose any data
+        </TextBlock>
+        <sys:String x:Key="TextHeaderMergeObjDirectory">Merge Obj Files from a Directory</sys:String>
+        <sys:String x:Key="TextDescriptionMergeObjDirectory">Merge all obj files located in a directory into one</sys:String>
+
+        <sys:String x:Key="TextHeaderMergeObjList">Merge Obj Files from a List</sys:String>
+        <sys:String x:Key="TextDescriptionMergeObjList">Merge all obj files from the list into one</sys:String>
+        <sys:String x:Key="TextLabelMergeObjList">Add obj files to merge</sys:String>
+
+        <Style TargetType="ListBox" x:Key="StyleMergeObjText">
+            <Setter Property="Margin" Value="{StaticResource MarginMixLargeLtRtSmallDw}"/>
+            <Setter Property="Padding" Value="{StaticResource DefaultPadding}"/>
         </Style>
 
-        <Style TargetType="TextBlock" x:Key="ParagraphText">
-            <Setter Property="Margin" Value="10 0 10 0"/>
-            <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="FontStyle" Value="Italic"/>
-            <Setter Property="FontSize" Value="14"/>
-        </Style>
+        <!--#endregion-->
 
-        <Style TargetType="TextBlock" x:Key="SubParagraphText">
-            <Setter Property="Margin" Value="5 5 5 5"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="FontStyle" Value="Italic"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
+        <!--#region Strings - Other Tools-->
 
-        <Style TargetType="TextBlock" x:Key="SubParagraphText2">
-            <Setter Property="Margin" Value="5 5 5 5"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="FontWeight" Value="Regular"/>
-            <Setter Property="FontStyle" Value="Italic"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
+        <sys:String x:Key="TextDescriptionOtherToolsPage">Tools not directly related to N64 models</sys:String>
 
-        <Style TargetType="TextBlock" x:Key="BrowseText">
-            <Setter Property="Margin" Value="5 10 0 0"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
+        <!--#region Strings - Negative Picture-->
 
-        <Style TargetType="TextBox" x:Key="BrowseBox">
-            <Setter Property="Margin" Value="10 5"/>
-            <Setter Property="Padding" Value="5"/>
-        </Style>
-        <Style TargetType="Button" x:Key="BrowseFileButton">
-            <Setter Property="Margin" Value="10 5"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Background" Value="CornflowerBlue"/>
-        </Style>
-        <Style TargetType="Button" x:Key="BrowseFolderButton">
-            <Setter Property="Margin" Value="10 5"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Background" Value="MediumSeaGreen"/>
-        </Style>
+        <sys:String x:Key="TextHeaderNegativePicture">Negative Picture</sys:String>
+        <sys:String x:Key="TextDescriptionNegativePicture">Create the Negative of a Picture</sys:String>
+        <sys:String x:Key="TextLabelButtonNegativePicture">Create Negative</sys:String>
 
-        <Style TargetType="Button" x:Key="SaveButtonLeft">
-            <Setter Property="Margin" Value="30 5"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="HorizontalAlignment" Value="Left"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Background" Value="SandyBrown"/>
-        </Style>
-        <Style TargetType="Button" x:Key="SaveButtonRight">
-            <Setter Property="Margin" Value="10 5"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Background" Value="SandyBrown"/>
-        </Style>
+        <!--#endregion-->
 
-        <Style TargetType="Button" x:Key="SaveButtonCenter">
-            <Setter Property="Margin" Value="10 5"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Background" Value="SandyBrown"/>
-        </Style>
+        <!--#endregion-->
+
+        <!--#region Strings - Settings-->
+
+        <sys:String x:Key="TextDescriptionSettingsPage">Manage Settings of the App</sys:String>
+        <sys:String x:Key="TextHeaderBlackListConfigs">BlackList Create/Delete Configs</sys:String>
+        <!--<sys:String x:Key="TextDescriptionBlackListConfigs">Create and Delete BlackList Configs useable in Modify Obj</sys:String>-->
+        <TextBlock x:Key="TextBlockDescriptionBlackListInfo" Style="{StaticResource ToolParagraphDescription}" TextWrapping="WrapWithOverflow">
+            Create and Delete BlackList Configs useable in <TextBlock FontWeight="SemiBold" FontStyle="Normal" Text="{StaticResource TextHeaderModifyObj}" /><LineBreak/>
+            In <TextBlock FontWeight="SemiBold" FontStyle="Normal" Text="{StaticResource TextHeaderModifyObj}" />,
+            check the option <TextBlock FontWeight="SemiBold" Text="{StaticResource TextLabelModifyObjBlackList}" /> 
+            and every objects of the Obj File that use a blacklisted texture will get deleted
+        </TextBlock>
+        <sys:String x:Key="TextHeaderBlackListTextures">BlackList Add/Remove Textures</sys:String>
+        <sys:String x:Key="TextDescriptionBlackListTextures">Add Textures to BlackList Configs or Remove them</sys:String>
+        <TextBlock x:Key="TextBlockDescriptionBlackListTextures" Style="{StaticResource ToolParagraphDescription}">
+           Add Textures to a BlackList Config or Remove them<LineBreak/>
+            Drag and Drop supported
+        </TextBlock>
+        <sys:String x:Key="TextHeaderBlackListCopy">BlackList Copy Textures</sys:String>
+        <TextBlock x:Key="TextBlockDescriptionBlackListCopy" Style="{StaticResource ToolParagraphDescription}">
+           Copy every Textures of the selected Config into the <TextBlock FontWeight="SemiBold" Text="{StaticResource TextLabelDirectoryOutput}"/>
+        </TextBlock>
 
 
-        <Style TargetType="TextBlock" x:Key="NonUniformScaleText">
-            <Setter Property="Margin" Value="2 0"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="TextAlignment" Value="Right"/>
-        </Style>
-        <Style TargetType="TextBox" x:Key="NonUniformScaleBox">
-            <Setter Property="Margin" Value="2 0"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="TextAlignment" Value="Left"/>
-        </Style>
-
-        <Style TargetType="TextBlock" x:Key="FlipMirrorImageText">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0 2"/>
-        </Style>
-        
-        <Style TargetType="Image" x:Key="FlipMirrorImage">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Stretch" Value="None"/>
-            <Setter Property="Margin" Value="5"/>
-        </Style>
-
-        
+        <!--#endregion-->
 
 
-        <DataTemplate x:Key="TextureBlackListTemplate" >
+        <!--#endregion-->
+
+        <!--#region DataTemplate-->
+
+        <DataTemplate x:Key="ToolBlackListTemplate">
+            <TextBlock Text="{Binding Path=Name}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ToolBlackListTemplateBox">
             <TextBlock Text="{Binding}"/>
         </DataTemplate>
 
-        <DataTemplate x:Key="MergeObjSpecListTemplate" >
+        <DataTemplate x:Key="ToolMergeObjListTemplate">
             <TextBlock Text="{Binding}"/>
         </DataTemplate>
-        
-        
 
-        <DataTemplate x:Key="GameBlackListTemplate" >
-            <!--<ComboBoxItem Content="{Binding Path=Name}" />-->
-            
-            <TextBlock Text="{Binding  Path=Name}"/>
-        </DataTemplate>
+        <!--#endregion-->
 
     </Window.Resources>
 
-    <!-- <LineBreak/> -->
+    <Border Style="{StaticResource ToolMainBorderStyle}">
+       
+        <TabControl Style="{StaticResource ToolMainTabStyle}" >
 
-    <Border Padding="5" Background="{StaticResource BG_Color}">
+            <!--#region Wrl to Obj-->
 
-        <StackPanel>
-            <!--Height="{StaticResource WindowHeight}" -->
-            <TabControl BorderThickness="2" Background="{StaticResource BG_Color}">
-
-                <!--WRL to OBJ-->
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="Wrl To Obj"/>
-                    </TabItem.Header>
-                    <StackPanel Background="{StaticResource BG_Color}">
-                        <TextBlock Style="{StaticResource PageTitle}">Wrl To Obj</TextBlock>
-                        <TextBlock Style="{StaticResource ParagraphText}">
-                            Convert a .wrl file to .obj
-                        </TextBlock>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-
-                        <TabControl Margin="5 10" BorderThickness="1" Background="{StaticResource BG_Color}">
-                            <TabItem>
-                                <TabItem.Header>
-                                    <TextBlock Text="Convert a Wrl file"/>
-                                </TabItem.Header>
-                                <StackPanel Name="WrlDragDrop" AllowDrop="True" Drop="WrlDragDrop_Drop">
-                                    <TextBlock Style="{StaticResource BrowseText}">Select a wrl file</TextBlock>
-
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Name="WrlBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="WrlBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="WrlDragDrop_Drop"/>
-                                        <Button Name="WrlBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="WrlBrowseButton_Click">Browse</Button>
-                                    </Grid>
-
-
-
-                                    <!--Reverse Vertex Order-->
-                                    <CheckBox Name="WrlModifyVertex" HorizontalAlignment="Center" ToolTip="Reverse every vertices of the model" Margin="{StaticResource MarginCheckbox2}">Reverse Vertex Order</CheckBox>
-
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                    </Grid>
-
-                                    <Button Name="WrlSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="WrlSaveButton_Click">Convert to Obj</Button>
-
-
-                                </StackPanel>
-                            </TabItem>
-                            <TabItem>
-                                <TabItem.Header>
-                                    <TextBlock Text="Convert multiple Wrl files"/>
-                                </TabItem.Header>
-                                <StackPanel Name="WrlsDragDrop" AllowDrop="True" Drop="WrlsDragDrop_Drop">
-                                    <TextBlock Style="{StaticResource BrowseText}">Select a folder</TextBlock>
-
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Name="WrlsBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="WrlsBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="WrlsDragDrop_Drop"
-                                                 ToolTip="It will convert every .wrl files in this folder and subfolders" />
-                                        <Button Name="WrlsBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="WrlsBrowseButton_Click">Browse</Button>
-                                    </Grid>
-
-
-
-                                    <!--Reverse Vertex Order-->
-                                    <CheckBox Name="WrlsModifyVertex" HorizontalAlignment="Center" ToolTip="Reverse every vertices of the model" Margin="{StaticResource MarginCheckbox2}">Reverse Vertex Order</CheckBox>
-
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                    </Grid>
-
-                                    <Button Name="WrlsSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="WrlsSaveButton_Click">Convert to Obj</Button>
-
-
-                                </StackPanel>
-                            </TabItem>
-
-                            <!--
-                            <TextBlock Style="{StaticResource BrowseText}">Select a folder</TextBlock>
-
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Name="MergeObjFolderBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="MergeObjFolderBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="MergeObjFolderBrowseBox_PreviewDrop"/>
-                                        <Button Name="MergeObjFolderBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="MergeObjFolderBrowseButton_Click">Browse</Button>
-                                    </Grid>
-
-                                    <Button Name="MergeObjFolderSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="MergeObjFolderSaveButton_Click">Merge Obj Files</Button>
-
-                            -->
-
-                        </TabControl>
-
-
-
-         
-                    </StackPanel>
-                </TabItem>
-
-                <!--OBJ Tools-->
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="Obj Tools"/>
-                    </TabItem.Header>
-                    <StackPanel Name="ObjDragDrop" Background="{StaticResource BG_Color}" AllowDrop="True" Drop="ObjDragDrop_Drop">
-
-                        <TextBlock Style="{StaticResource PageTitle}">Obj Tools</TextBlock>
-                        <TextBlock Style="{StaticResource ParagraphText}">
-                            Bunch of tools related to .obj file
-                        </TextBlock>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                        <TextBlock Style="{StaticResource BrowseText}">Select an obj file</TextBlock>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="5*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Name="ObjBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="ObjBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="ObjDragDrop_Drop" />
-                            <Button Name="ObjBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="ObjBrowseButton_Click">Browse</Button>
+            <TabItem Name="TabWrlToObj">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleWrlToObj}"/>
+                </TabItem.Header>
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleWrlToObj}" />
+                        <Grid Style="{StaticResource GridPageDescription}">
+                            <TextBlock Style="{StaticResource ToolPageDescription}" Text="{StaticResource TextDescriptionWrlToObjPage}" />
                         </Grid>
+                        <ContentControl Content="{StaticResource ToolSeparator}"/>
+                    </StackPanel>
 
-                        <TabControl Margin="5" Padding="5" BorderThickness="1" Background="{StaticResource BG_Color}">
+                    <!--DockFirstElement-->
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <TabControl Style="{StaticResource ToolSubTabsStyle}">
 
-                            <TabItem>
+                            <!--#region Wrl to Obj - Convert one Wrl file-->
+
+                            <TabItem Name="TabWrlToObjConvertOne">
                                 <TabItem.Header>
-                                    <TextBlock Text="Delete Materials"/>
+                                    <TextBlock Text="{StaticResource TextHeaderWrlToObj}"/>
                                 </TabItem.Header>
-                                <StackPanel Background="{StaticResource BG_Color}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Style="{StaticResource SubParagraphText}">
-                                            Delete every materials from the obj file
-                                        </TextBlock>
-                                        <Button Name="ObjDeleteMaterialsButton"  Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="ObjDeleteMaterialsButton_Click">Delete Materials</Button>
+                                <StackPanel AllowDrop="True" Drop="WrlFileDrag_Drop">
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <TextBlock Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionWrlToObj}" />
                                     </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
 
-                                    <Separator />
-
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridFirstElement}" >
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Style="{StaticResource SubParagraphText}">
-                                            Delete all unused materials from the obj file
-                                        </TextBlock>
-                                        <Button Name="ObjDeleteUnusedMaterialsButton" Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="ObjDeleteUnusedMaterialsButton_Click" >
-                                            <TextBlock TextWrapping="Wrap" TextAlignment="Center">Delete Unused Materials</TextBlock>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelWrlFile}" />
+                                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="WrlFileTextBox" TextChanged="WrlFileTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="WrlFileDrag_Drop" />
+
+                                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="WrlFileBrowseButton" Click="WrlFileBrowseButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
                                         </Button>
                                     </Grid>
 
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <CheckBox Name="WrlReverseVertexCheckbox" Style="{StaticResource ToolCheckBoxAlignCenter}" Content="{StaticResource TextLabelReverseVertex}" 
+                                                    ToolTip="{StaticResource TextTooltipReverseVertex}" IsChecked="False" />
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridLastElement}">
+                                        <Button Style="{StaticResource ToolExecuteButton}" Name="WrlConvertExecuteButton" IsEnabled="False" Click="WrlConvertExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonConvertToObj}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
                                 </StackPanel>
                             </TabItem>
-                            <TabItem>
+
+                            <!--#endregion-->
+
+                            <!--#region Wrl to Obj - Convert multiple wrl-->
+
+                            <TabItem Name="TabWrlToObjConvertMultiple">
                                 <TabItem.Header>
-                                    <TextBlock Text="Add Materials"/>
+                                    <TextBlock Text="{StaticResource TextHeaderWrlsToObj}"/>
                                 </TabItem.Header>
-                                <StackPanel Background="{StaticResource BG_Color}">
-                                    <Grid>
+                                <StackPanel Name="WrlsDragDrop" AllowDrop="True" Drop="WrlsDirectoryDrag_Drop">
+
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <TextBlock Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionWrlsToObj}"/>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                                    <Grid Style="{StaticResource GridFirstElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Style="{StaticResource SubParagraphText}">
-                                        Automatically create materials and assign textures to each object of the .obj<LineBreak/>
-                                        Objects names need to contain the texture name
-                                        </TextBlock>
-                                        <Button Name="ObjAddMaterialsButton" Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="ObjAddMaterialsButton_Click">Add Materials</Button>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelDirectoryPath}" />
+                                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="WrlsDirectoryTextBox" 
+                                                    PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="WrlsDirectoryDrag_Drop" TextChanged="WrlsDirectoryTextBox_TextChanged" />
+                                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="WrlsDirectoryBrowseButton" Click="WrlsDirectoryBrowseButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                                        </Button>
                                     </Grid>
 
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <CheckBox Name="WrlsReverseVertexCheckbox" Style="{StaticResource ToolCheckBoxAlignCenter}" Content="{StaticResource TextLabelReverseVertex}" 
+                                                    ToolTip="{StaticResource TextTooltipReverseVertex}" IsChecked="False" />
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridLastElement}">
+                                        <Button Style="{StaticResource ToolExecuteButton}" Name="WrlsConvertExecuteButton" IsEnabled="False" Click="WrlsConvertExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonConvertToObj}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
                                 </StackPanel>
                             </TabItem>
 
-                            <TabItem>
-                                <TabItem.Header>
-                                    <TextBlock Text="Modify Obj"/>
-                                </TabItem.Header>
-                                <StackPanel Background="{StaticResource BG_Color}">
-
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Style="{StaticResource SubParagraphText}">
-                                        Modify the .obj file based on your selection<LineBreak/>
-                                        Some options require the .obj file to have an associated .mtl file
-                                        </TextBlock>
-                                        <Button Name="ObjModifyButton" Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="ObjModifyButton_Click">Modify Obj</Button>
-                                    </Grid>
-
-                                    <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                                    <!--Reverse Vertex Order-->
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Name="ObjModifyVertex" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Reverse every vertices of the model">Reverse Vertex Order</CheckBox>
-                                    </Grid>
-
-                                    <!--Merge-->
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="3*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Name="ObjModifyMerge" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Merge together groups &amp; materials sharing a texture">Merge Groups &amp; Materials</CheckBox>
-                                    </Grid>
-
-                                    <!--Sort-->
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Name="ObjModifySort" HorizontalAlignment="Left" Grid.Column="0" ToolTip="Sort groups &amp; materials by name alphabetically">Sort Groups &amp; Materials</CheckBox>
-                                    </Grid>
-
-                                    <!--Uniform Scaling-->
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Name="ObjModifyUniformScale" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Scale uniformly the model by the specified value" Checked="ObjModifyUniformScale_Changed" Unchecked="ObjModifyUniformScale_Changed">Uniform Scaling</CheckBox>
-                                        <Grid Grid.Column="1" Margin="{StaticResource MarginColumnObj}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="4*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid Grid.Column="0" Margin="{StaticResource MarginColumnObj}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Style="{StaticResource NonUniformScaleText}">XYZ</TextBlock>
-                                                <TextBox Name="ObjModifyScaleValueXYZ" Grid.Column="1" Style="{StaticResource NonUniformScaleBox}" IsEnabled="False">1.0</TextBox>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-
-                                    <!--Non Uniform Scaling-->
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Name="ObjModifyNonUniformScale" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Scale non uniformly the model by the specified values" Checked="ObjModifyNonUniformScale_Changed" Unchecked="ObjModifyNonUniformScale_Changed">Non Uniform Scaling</CheckBox>
-                                        <Grid Grid.Column="1" Margin="{StaticResource MarginColumnObj}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Grid Grid.Column="0" Margin="{StaticResource MarginColumnObj}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Style="{StaticResource NonUniformScaleText}">X</TextBlock>
-                                                <TextBox Name="ObjModifyScaleValueX" Grid.Column="1" Style="{StaticResource NonUniformScaleBox}" IsEnabled="False">1.0</TextBox>
-                                            </Grid>
-                                            <Grid Grid.Column="1" Margin="{StaticResource MarginColumnObj}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Style="{StaticResource NonUniformScaleText}">Y</TextBlock>
-                                                <TextBox Name="ObjModifyScaleValueY" Grid.Column="1" Style="{StaticResource NonUniformScaleBox}" IsEnabled="False">1.0</TextBox>
-                                            </Grid>
-                                            <Grid Grid.Column="2" Margin="{StaticResource MarginColumnObj}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Style="{StaticResource NonUniformScaleText}">Z</TextBlock>
-                                                <TextBox Name="ObjModifyScaleValueZ" Grid.Column="1" Style="{StaticResource NonUniformScaleBox}" IsEnabled="False">1.0</TextBox>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-
-                                    <!--Rotate Model-->
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Name="ObjModifyRotate" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Rotate the model by the specified values" Checked="ObjModifyRotate_Changed" Unchecked="ObjModifyRotate_Changed">Rotate Model</CheckBox>
-                                        <Grid Grid.Column="1" Margin="{StaticResource MarginColumnObj}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Grid Grid.Column="0" Margin="{StaticResource MarginColumnObj}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Style="{StaticResource NonUniformScaleText}">X</TextBlock>
-                                                <TextBox Name="ObjModifyRotateValueX" Grid.Column="1" Style="{StaticResource NonUniformScaleBox}" IsEnabled="False">0.0</TextBox>
-                                            </Grid>
-                                            <Grid Grid.Column="1" Margin="{StaticResource MarginColumnObj}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Style="{StaticResource NonUniformScaleText}">Y</TextBlock>
-                                                <TextBox Name="ObjModifyRotateValueY" Grid.Column="1" Style="{StaticResource NonUniformScaleBox}" IsEnabled="False">0.0</TextBox>
-                                            </Grid>
-                                            <Grid Grid.Column="2" Margin="{StaticResource MarginColumnObj}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Style="{StaticResource NonUniformScaleText}">Z</TextBlock>
-                                                <TextBox Name="ObjModifyRotateValueZ" Grid.Column="1" Style="{StaticResource NonUniformScaleBox}" IsEnabled="False">0.0</TextBox>
-                                            </Grid>
-                                        </Grid>
-
-                                    </Grid>
-
-                                    <!--Textures BlackList-->
-                                    <Grid Margin="{StaticResource MarginBaseGridObj}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="5*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox IsEnabled="True" Name="ObjModifyBlackList" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Delete objects that use specific textures (See Textures Blacklist Settings for more info)" 
-                                                  VerticalAlignment="Center" Checked="ObjModifyBlackList_Changed" Unchecked="ObjModifyBlackList_Changed">Delete Objects through Blacklist</CheckBox>
-                                        <Grid Grid.Column="1" Margin="{StaticResource MarginColumnObj}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="3*"/>
-                                                <ColumnDefinition Width="5*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" FontWeight="SemiBold" Margin="2 0" TextAlignment="Left" VerticalAlignment="Center">Game:</TextBlock>
-
-                                            <ComboBox Name="ObjModifyBlackListSelect" Grid.Column="1" Padding="2" IsEnabled="False"
-                                                                      ItemsSource="{Binding}" ItemTemplate="{StaticResource GameBlackListTemplate}" />
-
-                                        </Grid>
-                                    </Grid>
-                                </StackPanel>
-                            </TabItem>
-
-                            <TabItem>
-                                <TabItem.Header>
-                                    <TextBlock Text="Obj To Smd"/>
-                                </TabItem.Header>
-                                <StackPanel Background="{StaticResource BG_Color}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Style="{StaticResource SubParagraphText}">
-                                            Convert a .obj file to .smd
-                                        </TextBlock>
-                                        <Button Name="ObjToSmdButton"  Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="ObjToSmdButton_Click">Convert to Smd</Button>
-                                    </Grid>
-                                    <Separator/>
-                                    <CheckBox Name="ObjToSmdTextureCheckbox" HorizontalAlignment="Center" Margin="{StaticResource MarginCheckbox}" IsChecked="False" ToolTip="If checked, the model will look for vmt files named like the textures">Use the textures of the model</CheckBox>
-
-                                </StackPanel>
-                            </TabItem>
-
-                            <TabItem>
-                                <TabItem.Header>
-                                    <TextBlock Text="Reference Model"/>
-                                </TabItem.Header>
-                                <StackPanel Background="{StaticResource BG_Color}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Style="{StaticResource SubParagraphText}">
-                                            Convert a .obj file to .smd at a given scale and without any material
-                                        </TextBlock>
-                                        <Button Name="RefModelToSmdButton"  Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="RefModelToSmdButton_Click">Convert to Smd</Button>
-                                    </Grid>
-                                    <Separator/>
-
-                                    <TextBlock Style="{StaticResource BrowseText}">Select a scale</TextBlock>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="5*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Name="RefModelScaleValueXYZ" Style="{StaticResource BrowseBox}" Grid.Column="0">1.0</TextBox>
-                                    </Grid>
-                                    
-                                </StackPanel>
-                            </TabItem>
-
-                            <TabItem>
-                                <TabItem.Header>
-                                    <TextBlock Text="Copy Textures"/>
-                                </TabItem.Header>
-                                <StackPanel Background="{StaticResource BG_Color}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Style="{StaticResource SubParagraphText}">
-                                        Copy every textures used by the .obj file into the specified folder<LineBreak/>
-                                        Requires the .obj file to have an associated .mtl file<LineBreak/>
-                                        If you dont specify a texture folder, it will find textures relative to the .obj file
-                                        </TextBlock>
-                                        <Button Name="CopyTexturesButton" Grid.Column="1"  Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="CopyTexturesButton_Click" >Copy Textures</Button>
-
-                                    </Grid>
-
-
-                                    <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                                    <TextBlock Style="{StaticResource BrowseText}">Select the output folder</TextBlock>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Name="CopyTextureOutputBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="CopyTextureOutputBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="CopyTextureOutputDragDrop_Drop" ToolTip="// = 'Output folder' is the Folder of the obj file" />
-                                        <Button Name="CopyTextureOutputButton" Style="{StaticResource BrowseFolderButton}" Grid.Column="1" Click="CopyTextureOutputButton_Click">Browse</Button>
-                                    </Grid>
-
-                                    <TextBlock/>
-
-                                    <!--Load a specific folder-->
-                                    <CheckBox Name="CopyTextureFolderCheckbox" HorizontalAlignment="Left" Margin="{StaticResource MarginCheckbox}" Checked="CopyTextureFolderCheckbox_Changed" Unchecked="CopyTextureFolderCheckbox_Changed">Load a specific texture folder</CheckBox>
-
-                                    <TextBlock Style="{StaticResource BrowseText}">Select the texture folder</TextBlock>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Name="CopyTextureFolderBox" Style="{StaticResource BrowseBox}" Grid.Column="0" IsEnabled="False" TextChanged="CopyTextureFolderBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="CopyTextureFolderDragDrop_Drop" />
-                                        <Button Name="CopyTextureFolderButton"  Style="{StaticResource BrowseFolderButton}" Grid.Column="1" IsEnabled="False" Click="CopyTextureFolderButton_Click">Browse</Button>
-                                    </Grid>
-
-
-
-
-                                </StackPanel>
-                            </TabItem>
-
-                            
+                            <!--#endregion-->
 
                         </TabControl>
+                    </Grid>
+
+                </DockPanel>
+            </TabItem>
+
+            <!--#endregion-->
+
+            <!--#region Obj Tools-->
+
+            <TabItem Name="TabObjTools">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleObjTools}"/>
+                </TabItem.Header>
+                <DockPanel>
+  
+                    <!--#region Obj Tools - Generic-->
+
+                    <StackPanel DockPanel.Dock="Top" AllowDrop="True" Drop="ObjFileDrag_Drop">
+                        <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleObjTools}" />
+                        <Grid Style="{StaticResource GridPageDescription}">
+                            <TextBlock Style="{StaticResource ToolPageDescription}" Text="{StaticResource TextDescriptionObjToolsPage}" />
+                        </Grid>
+                        <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                        <Grid Style="{StaticResource GridSingleElement}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelObjFile}" />
+                            <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="ObjFileTextBox" TextChanged="ObjFileTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="ObjFileDrag_Drop" />
+
+                            <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="ObjFileBrowseButton" Click="ObjFileBrowseButton_Click" >
+                                <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                            </Button>
+                        </Grid>
                     </StackPanel>
-                </TabItem>
+                    
+                    <!--#endregion-->
 
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="Merge Obj Files"/>
-                    </TabItem.Header>
-                    <StackPanel Background="{StaticResource BG_Color}">
-                        <TextBlock Style="{StaticResource PageTitle}">Merge Obj Files</TextBlock>
-                        <TextBlock Style="{StaticResource ParagraphText}">
-                            • Merge all .obj files from a folder into a single one <LineBreak/>
-                            • Merge a list of selected .obj files into a single one
-                        </TextBlock>
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <TabControl Style="{StaticResource ToolSubTabsStyle}">
 
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
+                            <!--#region Obj Tools - Delete Materials-->
 
-                        <TabControl Margin="5 10" BorderThickness="1" Background="{StaticResource BG_Color}">
-                            <TabItem>
+                            <TabItem Name="TabObjToolsDeleteMaterials">
                                 <TabItem.Header>
-                                    <TextBlock Text="Merge All Obj Files from a Folder"/>
+                                    <TextBlock Text="{StaticResource TextHeaderDeleteMaterials}"/>
                                 </TabItem.Header>
                                 <StackPanel>
-                                    <TextBlock Style="{StaticResource BrowseText}">Select a folder</TextBlock>
-
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridSingleElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBox Name="MergeObjFolderBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="MergeObjFolderBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="MergeObjFolderBrowseBox_PreviewDrop"/>
-                                        <Button Name="MergeObjFolderBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="MergeObjFolderBrowseButton_Click">Browse</Button>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionDeleteMaterials}" />
+
+                                        <Button Grid.Column="1" Style="{StaticResource ToolExecuteButton}" Name="ObjDeleteMaterialsExecuteButton" Click="ObjDeleteMaterialsExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextHeaderDeleteMaterials}"/>
+                                        </Button>
                                     </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionDeleteUnusedMaterials}" />
 
-                                    <Button Name="MergeObjFolderSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="MergeObjFolderSaveButton_Click">Merge Obj Files</Button>
-
+                                        <Button Grid.Column="1" Style="{StaticResource ToolExecuteButton}" Name="ObjDeleteUnusedMaterialsExecuteButton" Click="ObjDeleteUnusedMaterialsExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextHeaderDeleteUnusedMaterials}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
                                 </StackPanel>
                             </TabItem>
-                            <TabItem>
+
+                            <!--#endregion-->
+
+                            <!--#region Obj Tools - Add Materials-->
+
+                            <TabItem Name="TabObjToolsAddMaterials">
                                 <TabItem.Header>
-                                    <TextBlock Text="Merge Specific Obj Files"/>
+                                    <TextBlock Text="{StaticResource TextHeaderAddMaterials}"/>
                                 </TabItem.Header>
                                 <StackPanel>
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridSingleElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="3*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
+                                        <ContentControl Grid.Column="0"  Content="{StaticResource TextBlockDescriptionAddMaterials}"/>
 
-                                        <TextBlock Grid.Column="0" Style="{StaticResource BrowseText}" VerticalAlignment="Top">Add the obj files to merge</TextBlock>
-                                        <Button Name="MergeObjSpecAddButton" Grid.Column="1" Style="{StaticResource BrowseFileButton}" IsEnabled="True" Click="MergeObjSpecAddButton_Click"  >Add Files</Button>
-                                        <Button Name="MergeObjSpecDeleteButton" Grid.Column="2" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="MergeObjSpecDeleteButton_Click"  >Remove Selected</Button>
-                                        <Button Name="MergeObjSpecSaveButton" Grid.Column="3" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="MergeObjSpecSaveButton_Click"  >Merge Obj Files</Button>
+                                        <Button Grid.Column="1" Style="{StaticResource ToolExecuteButton}" Name="ObjAddMaterialsExecuteButton" Click="ObjAddMaterialsExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextHeaderAddMaterials}"/>
+                                        </Button>
                                     </Grid>
-
-                                    <ListBox Name="MergeObjSpecBox" Height="250" Margin="10 5" SelectionMode="Extended"
-	                                    ItemsSource="{Binding}" ItemTemplate="{StaticResource MergeObjSpecListTemplate}" SelectionChanged="MergeObjSpecBox_SelectionChanged"  
-                                             AllowDrop="True" Drop="MergeObjSpecBox_Drop"
-                                             />
-
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
                                 </StackPanel>
                             </TabItem>
+
+                            <!--#endregion-->
+
+                            <!--#region Obj Tools - Modify Obj-->
+
+                            <TabItem Name="TabObjToolsModifyObj">
+                                <TabItem.Header>
+                                    <TextBlock Text="{StaticResource TextHeaderModifyObj}"/>
+                                </TabItem.Header>
+                                <StackPanel>
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ContentControl Grid.Column="0"  Content="{StaticResource TextBlockDescriptionModifyObj}"/>
+                                        <Button Grid.Column="1" Style="{StaticResource ToolExecuteButton}" Name="ObjModifyObjExecuteButton" Click="ObjModifyObjExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextHeaderModifyObj}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                                    <Grid Style="{StaticResource GridListFirstElement}">
+                                        <CheckBox Style="{StaticResource ToolListOfCheckBoxes}" Name="ObjModifyObjCkbReverseVertex" 
+                                                    ToolTip="{StaticResource TextTooltipReverseVertex}" Content="{StaticResource TextLabelReverseVertex}" />
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridListElement}">
+                                        <CheckBox Style="{StaticResource ToolListOfCheckBoxes}" Name="ObjModifyObjCkbMerge" 
+                                                    ToolTip="{StaticResource TextTooltipReverseVertex}" Content="{StaticResource TextLabelModifyObjMerge}" />
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridListElement}">
+                                        <CheckBox Style="{StaticResource ToolListOfCheckBoxes}" Name="ObjModifyObjCkbSort" 
+                                                    ToolTip="{StaticResource TextTooltipReverseVertex}" Content="{StaticResource TextLabelModifyObjSort}" />
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridListElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxes}" Name="ObjModifyObjCkbScaleUni" 
+                                                    ToolTip="{StaticResource TextTooltipModifyObjScaleUni}" Content="{StaticResource TextBlockModifyObjScaleUni}" 
+                                                    Unchecked="ObjModifyObjCkbScaleUni_Changed" Checked="ObjModifyObjCkbScaleUni_Changed" />
+                                        <Grid Grid.Column="1" Style="{StaticResource GridVerticalResize}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabel}" Text="{StaticResource TextLabelLetterXYZ}" />
+                                                <TextBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesTextbox}" Name="ObjModifyObjTextBoxScaleUni"
+                                                            Text="{StaticResource DefaultScaleValue}" 
+                                                            IsEnabled="False" />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridListElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxes}" Name="ObjModifyObjCkbScaleNonUni" 
+                                                    ToolTip="{StaticResource TextTooltipModifyObjScaleNonUni}" Content="{StaticResource TextBlockModifyObjScaleNonUni}" 
+                                                    Unchecked="ObjModifyObjCkbScaleNonUni_Changed" Checked="ObjModifyObjCkbScaleNonUni_Changed" />
+                                        <Grid Grid.Column="1" Style="{StaticResource GridVerticalResize}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabel}" Text="{StaticResource TextLabelLetterX}" />
+                                                <TextBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesTextbox}" Name="ObjModifyObjTextBoxScaleNonUniX"
+                                                            Text="{StaticResource DefaultScaleValue}" IsEnabled="False" />
+                                            </Grid>
+                                            <Grid Grid.Column="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabel}" Text="{StaticResource TextLabelLetterY}" />
+                                                <TextBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesTextbox}" Name="ObjModifyObjTextBoxScaleNonUniY"
+                                                            Text="{StaticResource DefaultScaleValue}" IsEnabled="False" />
+                                            </Grid>
+                                            <Grid Grid.Column="2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabel}" Text="{StaticResource TextLabelLetterZ}" />
+                                                <TextBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesTextbox}" Name="ObjModifyObjTextBoxScaleNonUniZ"
+                                                            Text="{StaticResource DefaultScaleValue}" IsEnabled="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridListElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxes}" Name="ObjModifyObjCkbRotate"
+                                                    ToolTip="{StaticResource TextTooltipModifyObjRotate}" Content="{StaticResource TextBlockModifyObjRotate}" 
+                                                    Unchecked="ObjModifyObjCkbRotate_Changed" Checked="ObjModifyObjCkbRotate_Changed"
+                                                    />
+                                        <Grid Grid.Column="1" Style="{StaticResource GridVerticalResize}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabel}" Text="{StaticResource TextLabelLetterX}" />
+                                                <TextBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesTextbox}" Name="ObjModifyObjTextBoxRotateX"
+                                                            Text="{StaticResource DefaultRotationValue}" IsEnabled="False" />
+                                            </Grid>
+                                            <Grid Grid.Column="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabel}" Text="{StaticResource TextLabelLetterY}" />
+                                                <TextBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesTextbox}" Name="ObjModifyObjTextBoxRotateY"
+                                                            Text="{StaticResource DefaultRotationValue}" IsEnabled="False" />
+                                            </Grid>
+                                            <Grid Grid.Column="2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabel}" Text="{StaticResource TextLabelLetterZ}" />
+                                                <TextBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesTextbox}" Name="ObjModifyObjTextBoxRotateZ"
+                                                            Text="{StaticResource DefaultRotationValue}" IsEnabled="False" />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridListLastElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxes}" Name="ObjModifyObjCkbBlackList" IsEnabled="False"
+                                                    ToolTip="{StaticResource TextTooltipModifyObjBlackList}" Content="{StaticResource TextBlockModifyObjBlackList}" 
+                                                    Unchecked="ObjModifyObjCkbBlackList_Changed" Checked="ObjModifyObjCkbBlackList_Changed" />
+                                        <Grid Grid.Column="1" Style="{StaticResource GridVerticalResize}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Style="{StaticResource ToolListOfCheckBoxesLabelComboBox}" Text="{StaticResource TextLabelModifyObjBlackListConfig}" />
+                                            <Grid Grid.Column="1" Style="{StaticResource GridVerticalResize}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox Grid.Column="1" Style="{StaticResource ToolListOfCheckBoxesComboBox}" Name="ObjModifyObjComboBoxBlackList" 
+                                                            IsEnabled="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource ToolBlackListTemplate}" />
+                                            </Grid>
+                                            <Grid Grid.Column="2" Style="{StaticResource GridVerticalResize}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="1" Style="{StaticResource ToolExecuteButton}" Name="BlackListConfigShortcutButton" Click="BlackListConfigShortcutButton_Click" >
+                                                    <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelModifyObjBlackListSetup}"/>
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                                </StackPanel>
+                            </TabItem>
+
+                            <!--#endregion-->
+
+                            <!--#region Obj Tools - Obj to Smd-->
+
+                            <TabItem Name="TabObjToolsObjToSmd">
+                                <TabItem.Header>
+                                    <TextBlock Text="{StaticResource TextHeaderObjToSmd}"/>
+                                </TabItem.Header>
+                                <StackPanel>
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionObjToSmd}" />
+                                        <Button Grid.Column="1" Style="{StaticResource ToolExecuteButton}" Name="ObjObjToSmdExecuteButton" Click="ObjObjToSmdExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonConvertToSmd}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <RadioButton Grid.Column="0" Style="{StaticResource ToolRadioButtonAlignRight}" Name="ObjObjToSmdRadioMaterial" GroupName="ObjToSmdChoice"
+                                                        Content="{StaticResource TextLabelSmdUseMaterials}" ToolTip="{StaticResource TextTooltipSmdUseMaterials}" IsChecked="True"/>
+                                        <RadioButton Grid.Column="1" Style="{StaticResource ToolRadioButtonAlignLeft}" Name="ObjObjToSmdRadioTexture"  GroupName="ObjToSmdChoice" 
+                                                        Content="{StaticResource TextLabelSmdUseTextures}" ToolTip="{StaticResource TextTooltipSmdUseTextures}"/>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                                </StackPanel>
+                            </TabItem>
+
+                            <!--#endregion-->
+
+                            <!--#region Obj Tools - Reference Model-->
+
+                            <TabItem Name="TabObjToolsReferenceModel">
+                                <TabItem.Header>
+                                    <TextBlock Text="{StaticResource TextHeaderReferenceModel}"/>
+                                </TabItem.Header>
+                                <StackPanel>
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionReferenceModel}" />
+                                        <Button Grid.Column="1" Style="{StaticResource ToolExecuteButton}" Name="ObjReferenceModelExecuteButton" Click="ObjReferenceModelExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonConvertToSmd}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelScale}" />
+                                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="ObjReferenceModelScaleTextBox" Text="{StaticResource DefaultScaleValue}"/>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                                </StackPanel>
+                            </TabItem>
+
+                            <!--#endregion-->
+
+                        </TabControl>
+                    </Grid>
+
+                </DockPanel>
+            </TabItem>
+
+            <!--#endregion-->
+
+            <!--#region Copy Textures-->
+
+            <TabItem Name="TabCopyTextures">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleCopyTextures}"/>
+                </TabItem.Header>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleCopyTextures}"/>
+                    <Grid Style="{StaticResource GridPageDescription}">
+                        <ContentControl Content="{StaticResource TextBlockDescriptionCopyTexturesPage}"/>
+                    </Grid>
+                    <!--<ContentControl Content="{StaticResource ToolSeparator}"/>-->
+
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelObjFile}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="CopyTexturesObjFileTextBox" TextChanged="CopyTexturesObjFileTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="CopyTexturesObjFileDrag_Drop" />
+                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="CopyTexturesObjFileBrowseButton" Click="CopyTexturesObjFileBrowseButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                        </Button>
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <CheckBox Name="CopyTexturesDirOutputCheckBox" Style="{StaticResource ToolCheckBoxAlignLeft}" IsChecked="False" 
+                                    Content="{StaticResource TextLabelDirectoryOutputSame}"
+                                    Unchecked="CopyTexturesDirOutputCheckBox_Changed" Checked="CopyTexturesDirOutputCheckBox_Changed" />
+                    </Grid>
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelDirectoryOutput}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="CopyTexturesDirOutputTextBox" TextChanged="CopyTexturesDirOutputTextBox_TextChanged" 
+                                    PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="CopyTexturesDirOutputDrag_Drop" />
+
+                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="CopyTexturesDirOutputBrowseButton" Click="CopyTexturesDirOutputBrowseButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                        </Button>
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <CheckBox Name="CopyTexturesDirTextureCheckBox" Style="{StaticResource ToolCheckBoxAlignLeft}" IsChecked="False" 
+                                    Content="{StaticResource TextLabelDirectoryTexturesSpecific}" ToolTip="{StaticResource TextTooltipDirectoryTexturesCopy}"
+                                    Unchecked="CopyTexturesDirTextureCheckBox_Changed" Checked="CopyTexturesDirTextureCheckBox_Changed" />
+                    </Grid>
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelDirectoryTextures}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="CopyTexturesDirTextureTextBox" TextChanged="CopyTexturesDirTextureTextBox_TextChanged"
+                                                IsEnabled="False" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="CopyTexturesDirTextureDrag_Drop" />
+
+                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="CopyTexturesDirTextureBrowseButton" IsEnabled="False" Click="CopyTexturesDirTextureBrowseButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                        </Button>
+                    </Grid>
+
+                    <Grid Style="{StaticResource GridLastElement}">
+                        <Button Style="{StaticResource ToolExecuteButton}" Name="CopyTexturesExecuteButton" IsEnabled="False" Click="CopyTexturesExecuteButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextTitleCopyTextures}"/>
+                        </Button>
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                </StackPanel>
+            </TabItem>
+
+            <!--#endregion-->
+
+            <!--#region Flip Texture-->
+
+            <TabItem Name="TabFlipTexture">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleFlipTexture}"/>
+                </TabItem.Header>
+                <StackPanel AllowDrop="True" Drop="FlipTextureFileDrag_Drop">
+                    <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleFlipTexture}"/>
+                    <Grid Style="{StaticResource GridPageDescription}">
+                        <TextBlock Style="{StaticResource ToolPageDescription}" Text="{StaticResource TextDescriptionFlipTexturePage}" />
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelTextureFile}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="FlipTextureFileTextBox" TextChanged="FlipTextureFileTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="FlipTextureFileDrag_Drop" />
+                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="FlipTextureFileBrowseButton" Click="FlipTextureFileBrowseButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                        </Button>
+                    </Grid>
+
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Column="0" Style="{StaticResource ToolCheckBoxAlignRight}" Content="{StaticResource TextLabelFlipHorizontally}" 
+                                    Name="FlipTextureCkbHorizontally" Unchecked="FlipTextureCkbHorizontally_Changed" Checked="FlipTextureCkbHorizontally_Changed"/>
+                        <CheckBox Grid.Column="1" Style="{StaticResource ToolCheckBoxAlignLeft}" Content="{StaticResource TextLabelFlipVertically}"
+                                    Name="FlipTextureCkbVertically" Unchecked="FlipTextureCkbVertically_Changed" Checked="FlipTextureCkbVertically_Changed" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource GridLastElement}">
+                        <Button Style="{StaticResource ToolExecuteButton}" Name="FlipTextureExecuteButton" IsEnabled="False" Click="FlipTextureExecuteButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextTitleFlipTexture}"/>
+                        </Button>
+                    </Grid>
+
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Style="{StaticResource GridRowSizeAuto}"/>
+                            <RowDefinition Style="{StaticResource GridRowSize1}"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageBase}" />
+                        <Image Grid.Column="0" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageBase}" />
+
+                        <TextBlock Grid.Column="1" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageFlipHorizontally}" />
+                        <Image Grid.Column="1" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageFlipHorizontally}" />
+
+                        <TextBlock Grid.Column="2" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageFlipVertically}" />
+                        <Image Grid.Column="2" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageFlipVertically}" />
+
+                        <TextBlock Grid.Column="3" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageFlipHorizontallyVertically}" />
+                        <Image Grid.Column="3" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageFlipHorizontallyVertically}" />
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                </StackPanel>
+            </TabItem>
+
+            <!--#endregion-->
+
+            <!--#region Mirror Texture-->
+
+            <TabItem Name="TabMirrorTexture">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleMirrorTexture}"/>
+                </TabItem.Header>
+                <StackPanel AllowDrop="True" Drop="MirrorTextureFileDrag_Drop">
+                    <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleMirrorTexture}"/>
+                    <Grid Style="{StaticResource GridPageDescription}">
+                        <TextBlock Style="{StaticResource ToolPageDescription}" Text="{StaticResource TextDescriptionMirrorTexturePage}" />
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelTextureFile}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="MirrorTextureFileTextBox" TextChanged="MirrorTextureFileTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="MirrorTextureFileDrag_Drop" />
+                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="MirrorTextureFileBrowseButton" Click="MirrorTextureFileBrowseButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                        </Button>
+                    </Grid>
+
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Column="0" Style="{StaticResource ToolCheckBoxAlignRight}" Content="{StaticResource TextLabelMirrorHorizontally}"
+                                    Name="MirrorTextureCkbHorizontally" Unchecked="MirrorTextureCkbHorizontally_Changed" Checked="MirrorTextureCkbHorizontally_Changed"/>
+                        <CheckBox Grid.Column="1" Style="{StaticResource ToolCheckBoxAlignLeft}" Content="{StaticResource TextLabelMirrorVertically}"
+                                    Name="MirrorTextureCkbVertically" Unchecked="MirrorTextureCkbVertically_Changed" Checked="MirrorTextureCkbVertically_Changed"/>
+                    </Grid>
+
+                    <Grid Style="{StaticResource GridLastElement}">
+                        <Button Style="{StaticResource ToolExecuteButton}" Name="MirrorTextureExecuteButton" IsEnabled="False" Click="MirrorTextureExecuteButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextTitleMirrorTexture}"/>
+                        </Button>
+                    </Grid>
+
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Style="{StaticResource GridRowSizeAuto}"/>
+                            <RowDefinition Style="{StaticResource GridRowSize1}"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageBase}" />
+                        <Image Grid.Column="0" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageBase}" />
+
+                        <TextBlock Grid.Column="1" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageMirrorHorizontally}" />
+                        <Image Grid.Column="1" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageMirrorHorizontally}" />
+
+                        <TextBlock Grid.Column="2" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageMirrorVertically}" />
+                        <Image Grid.Column="2" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageMirrorVertically}" />
+
+                        <TextBlock Grid.Column="3" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageMirrorHorizontallyVertically}" />
+                        <Image Grid.Column="3" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageMirrorHorizontallyVertically}" />
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                </StackPanel>
+            </TabItem>
+
+            <!--#endregion-->
+
+            <!--#region Transparent Texture-->
+
+            <TabItem Name="TabTransparentTexture">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleTransparentTexture}"/>
+                </TabItem.Header>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleTransparentTexture}"/>
+                    <Grid Style="{StaticResource GridPageDescription}">
+                        <ContentControl Content="{StaticResource TextBlockDescriptionTransparencyPage}"/>
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelTextureFile}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="TransparentTextureFileTextBox" TextChanged="TransparentTextureFileTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="TransparentTextureFileDrag_Drop" />
+                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="TransparentTextureFileBrowseButton" Click="TransparentTextureFileBrowseButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                        </Button>
+                    </Grid>
+
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelAlphaFile}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="TransparentAlphaFileTextBox" TextChanged="TransparentAlphaFileTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="TransparentAlphaFileDrag_Drop" />
+                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="TransparentAlphaFileBrowseButton" Click="TransparentAlphaFileBrowseButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                        </Button>
+                    </Grid>
+
+                    <Grid Style="{StaticResource GridLastElement}">
+                        <Button Style="{StaticResource ToolExecuteButton}" Name="TransparentTextureExecuteButton" IsEnabled="False" Click="TransparentTextureExecuteButton_Click" >
+                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelTransparencyButton}"/>
+                        </Button>
+                    </Grid>
+
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                    <Grid Style="{StaticResource GridSingleElement}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Style="{StaticResource GridRowSizeAuto}"/>
+                            <RowDefinition Style="{StaticResource GridRowSize1}"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageChainTexture}" />
+                        <Image Grid.Column="0" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageChainTexture}" />
+
+                        <TextBlock Grid.Column="1" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageChainAlpha}" />
+                        <Image Grid.Column="1" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageChainAlpha}" />
+
+                        <TextBlock Grid.Column="2" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageChainTransparent}" />
+                        <Image Grid.Column="2" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageChainTransparent}" />
+                    </Grid>
+                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                </StackPanel>
+            </TabItem>
+
+            <!--#endregion-->
+
+            <!--TODO: https://stackoverflow.com/questions/9200406/get-listbox-to-resize-with-window-but-not-resize-with-content -->
+            <!--Solution = Use grid row instead of stackpanel? -->
+
+            <!--#region Merge Obj Files-->
+
+            <TabItem Name="TabMergeObj">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleMergeObj}"/>
+                </TabItem.Header>
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleMergeObj}"/>
+                        <Grid Style="{StaticResource GridPageDescription}">
+                            <ContentControl Content="{StaticResource TextBlockDescriptionMergeObjPage}"/>
+                        </Grid>
+                        <ContentControl Content="{StaticResource ToolSeparator}"/>
+                    </StackPanel>
+
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <TabControl Style="{StaticResource ToolSubTabsStyle}">
+
+                            <!--#region Merge Obj Files - Directory-->
+
+                            <TabItem Name="TabMergeObjDirectory">
+                                <TabItem.Header>
+                                    <TextBlock Text="{StaticResource TextHeaderMergeObjDirectory}"/>
+                                </TabItem.Header>
+                                <StackPanel AllowDrop="True" Drop="MergeObjDirectoryDrag_Drop">
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <TextBlock Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionMergeObjDirectory}" />
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelDirectoryPath}" />
+                                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="MergeObjDirectoryTextBox" TextChanged="MergeObjDirectoryTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="MergeObjDirectoryDrag_Drop" />
+
+                                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="MergeObjDirectoryBrowseButton" Click="MergeObjDirectoryBrowseButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridLastElement}">
+                                        <Button Style="{StaticResource ToolExecuteButton}" Name="MergeObjDirectoryExecuteButton" IsEnabled="False" Click="MergeObjDirectoryExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextTitleMergeObj}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
+                                </StackPanel>
+                            </TabItem>
+
+                            <!--#endregion-->
+
+                            <!--#region Merge Obj Files - List-->
+
+                            <TabItem Name="TabMergeObjList">
+                                <TabItem.Header>
+                                    <TextBlock Text="{StaticResource TextHeaderMergeObjList}"/>
+                                </TabItem.Header>
+                                <DockPanel>
+                                    <Grid DockPanel.Dock="Top" Style="{StaticResource GridFirstElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionMergeObjList}" />
+                                        <!--<TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelMergeObjList}" />-->
+                                        <Button Grid.Column="1" Style="{StaticResource ToolOptionButton}" Name="MergeObjListAddButton" Click="MergeObjListAddButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonAddFiles}"/>
+                                        </Button>
+                                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="MergeObjListRemoveButton" IsEnabled="False" Click="MergeObjListRemoveButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonRemoveFiles}"/>
+                                        </Button>
+                                        <Button Grid.Column="3" Style="{StaticResource ToolOptionButton}" Name="MergeObjListExecuteButton" IsEnabled="False" Click="MergeObjListExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextTitleMergeObj}"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource GridFirstElement}" Name="MergeObjListBoxGrid">
+                                        <ListBox Name="MergeObjListBox" Style="{StaticResource StyleMergeObjText}" AllowDrop="True" Drop="MergeObjListDrag_Drop" 
+                                                 SelectionMode="Extended" MaxHeight="{Binding ElementName=MergeObjListBoxGrid, Path=ActualHeight}"
+                                                 ItemsSource="{Binding}" ItemTemplate="{StaticResource ToolMergeObjListTemplate}" SelectionChanged="MergeObjListBox_SelectionChanged"/>
+                                    </Grid>
+
+                                </DockPanel>
+                            </TabItem>
+
+                            <!--#endregion-->
 
 
                         </TabControl>
+                    </Grid>
+                </DockPanel>
 
-                        
+            </TabItem>
 
+            <!--#endregion-->
+
+            <!--#region Other Tools-->
+
+            <TabItem Name="TabOtherTools">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleOtherTools}"/>
+                </TabItem.Header>
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleOtherTools}" />
+                        <Grid Style="{StaticResource GridPageDescription}">
+                            <TextBlock Style="{StaticResource ToolPageDescription}" Text="{StaticResource TextDescriptionOtherToolsPage}" />
+                        </Grid>
+                        <ContentControl Content="{StaticResource ToolSeparator}"/>
                     </StackPanel>
-                </TabItem>
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <TabControl Style="{StaticResource ToolSubTabsStyle}">
 
-                <!--Flip Texture-->
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="Flip Texture"/>
-                    </TabItem.Header>
-                    <StackPanel Name="FlipDragDrop" AllowDrop="True" Drop="FlipDragDrop_Drop" Background="{StaticResource BG_Color}">
-                        <TextBlock Style="{StaticResource PageTitle}">Flip Texture</TextBlock>
-                        <TextBlock Style="{StaticResource ParagraphText}">
-                            Flip a texture horizontally and/or vertically
-                        </TextBlock>
+                            <!--#region Other Tools - Negative Picture-->
 
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                        <TextBlock Style="{StaticResource BrowseText}">Select a texture</TextBlock>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="5*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Name="FlipBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="FlipBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="FlipDragDrop_Drop"/>
-                            <Button Name="FlipBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="FlipBrowseButton_Click">Browse</Button>
-                        </Grid>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="1" Margin="0 5">
-                                <CheckBox Name="FlipHorizontallyCheckbox" HorizontalAlignment="Left" Margin="{StaticResource MarginCheckbox}" Checked="FlipHorizontallyCheckbox_Changed" Unchecked="FlipHorizontallyCheckbox_Changed">Flip Horizontally</CheckBox>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2" Margin="0 5">
-                                <CheckBox Name="FlipVerticallyCheckbox" HorizontalAlignment="Left" Margin="{StaticResource MarginCheckbox}" Checked="FlipVerticallyCheckbox_Changed" Unchecked="FlipVerticallyCheckbox_Changed">Flip Vertically</CheckBox>
-                            </StackPanel>
-                        </Grid>
-
-                        <Button Name="FlipSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="FlipSaveButton_Click">Flip Texture</Button>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Column="0" Style="{StaticResource FlipMirrorImageText}">Base Image</TextBlock>
-                            <Image Grid.Column="0" Grid.Row="1" Source="./Images/Base_32.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                            <TextBlock Grid.Column="1" Style="{StaticResource FlipMirrorImageText}">Flip Horizontally</TextBlock>
-                            <Image Grid.Column="1" Grid.Row="1" Source="./Images/Base_32_FlipHorizontally.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                            <TextBlock Grid.Column="2" Style="{StaticResource FlipMirrorImageText}">Flip Vertically</TextBlock>
-                            <Image Grid.Column="2" Grid.Row="1" Source="./Images/Base_32_FlipVertically.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                            <TextBlock Grid.Column="3" Style="{StaticResource FlipMirrorImageText}">Flip Horizontally &amp; Vertically</TextBlock>
-                            <Image Grid.Column="3" Grid.Row="1" Source="./Images/Base_32_FlipHorizontallyVertically.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                        </Grid>
-                        
-
-                    </StackPanel>
-                </TabItem>
-
-                <!--Mirror Texture-->
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="Mirror Texture"/>
-                    </TabItem.Header>
-                    <StackPanel Name="MirrorDragDrop" AllowDrop="True" Drop="MirrorDragDrop_Drop" Background="{StaticResource BG_Color}">
-                        <TextBlock Style="{StaticResource PageTitle}">Mirror Texture</TextBlock>
-                        <TextBlock Style="{StaticResource ParagraphText}">
-                            Mirror a texture horizontally and/or vertically
-                        </TextBlock>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                        <TextBlock Style="{StaticResource BrowseText}">Select a texture</TextBlock>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="5*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Name="MirrorBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="MirrorBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="MirrorDragDrop_Drop"/>
-                            <Button Name="MirrorBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="MirrorBrowseButton_Click">Browse</Button>
-                        </Grid>
-
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="1" Margin="0 5">
-                                <CheckBox Name="MirrorHorizontallyCheckbox" HorizontalAlignment="Left" Margin="{StaticResource MarginCheckbox}" Checked="MirrorHorizontallyCheckbox_Changed" Unchecked="MirrorHorizontallyCheckbox_Changed">Mirror Horizontally</CheckBox>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2" Margin="0 5">
-                                <CheckBox Name="MirrorVerticallyCheckbox" HorizontalAlignment="Left" Margin="{StaticResource MarginCheckbox}" Checked="MirrorVerticallyCheckbox_Changed" Unchecked="MirrorVerticallyCheckbox_Changed">Mirror Vertically</CheckBox>
-                            </StackPanel>
-                        </Grid>
-
-                        <Button Name="MirrorSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="MirrorSaveButton_Click">Mirror Texture</Button>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Column="0" Style="{StaticResource FlipMirrorImageText}">Base Image</TextBlock>
-                            <Image Grid.Column="0" Grid.Row="1" Source="./Images/Base_32.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                            <TextBlock Grid.Column="1" Style="{StaticResource FlipMirrorImageText}">Mirror Horizontally</TextBlock>
-                            <Image Grid.Column="1" Grid.Row="1" Source="./Images/Base_32_MirrorHorizontally.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                            <TextBlock Grid.Column="2" Style="{StaticResource FlipMirrorImageText}">Mirror Vertically</TextBlock>
-                            <Image Grid.Column="2" Grid.Row="1" Source="./Images/Base_32_MirrorVertically.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                            <TextBlock Grid.Column="3" Style="{StaticResource FlipMirrorImageText}">Mirror Horizontally &amp; Vertically</TextBlock>
-                            <Image Grid.Column="3" Grid.Row="1" Source="./Images/Base_32_MirrorHorizontallyVertically.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                        </Grid>
-                        
-                    </StackPanel>
-                </TabItem>
-
-                <!--Bmp To Png-->
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="Texture Transparency"/>
-                    </TabItem.Header>
-                    <StackPanel Background="{StaticResource BG_Color}">
-                        <TextBlock Style="{StaticResource PageTitle}">Texture Transparency</TextBlock>
-                        <TextBlock Style="{StaticResource ParagraphText}">
-                            Create a transparent .png from a texture and its alpha texture<LineBreak/>
-                            Both textures need to be the same size<LineBreak/>
-                            In the VRML dump, the textures are usually called 
-                            <TextBlock FontWeight="Light" FontStyle="Italic">XXXXXXXX_c.bmp</TextBlock> and 
-                            <TextBlock FontWeight="Light" FontStyle="Italic">XXXXXXXX_a.bmp</TextBlock>
-                        </TextBlock>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                        <StackPanel Name="BmpPngTextureDragDrop" AllowDrop="True" Drop="BmpPngTextureDragDrop_Drop">
-                            <TextBlock Style="{StaticResource BrowseText}">Select the texture</TextBlock>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="5*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Name="BmpPngTextureBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" ToolTip="XXXXXXXX_c.bmp" TextChanged="BmpPngTextureBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="BmpPngTextureDragDrop_Drop"/>
-                                <Button Name="BmpPngTextureBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="BmpPngTextureBrowseButton_Click">Browse</Button>
-                            </Grid>
-
-                        </StackPanel>
-
-
-                        <StackPanel Name="BmpPngAlphaDragDrop" AllowDrop="True" Drop="BmpPngAlphaDragDrop_Drop">
-                            <TextBlock Style="{StaticResource BrowseText}">Select the alpha texture</TextBlock>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="5*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Name="BmpPngAlphaBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" ToolTip="XXXXXXXX_a.bmp" TextChanged="BmpPngAlphaBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="BmpPngAlphaDragDrop_Drop"/>
-                                <Button Name="BmpPngAlphaBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="BmpPngAlphaBrowseButton_Click">Browse</Button>
-                            </Grid>
-                        </StackPanel>
-                        
-
-                        <Button Name="BmpPngSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="BmpPngSaveButton_Click">Create Transparent Png</Button>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Column="0" Style="{StaticResource FlipMirrorImageText}">Texture</TextBlock>
-                            <Image Grid.Column="0" Grid.Row="1" Source="./Images/Chain_Texture.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                            <TextBlock Grid.Column="1" Style="{StaticResource FlipMirrorImageText}">Alpha Texture</TextBlock>
-                            <Image Grid.Column="1" Grid.Row="1" Source="./Images/Chain_Alpha.png" Stretch="None" />
-
-                            <TextBlock Grid.Column="2" Style="{StaticResource FlipMirrorImageText}">Output Png</TextBlock>
-                            <Image Grid.Column="2" Grid.Row="1" Source="./Images/Chain_Transparent.png" Style="{StaticResource FlipMirrorImage}"/>
-
-                        </Grid>
-                        
-                    </StackPanel>
-                </TabItem>
-
-                <!-- Others -->
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="Other Tools"/>
-                    </TabItem.Header>
-
-                    <StackPanel Background="{StaticResource BG_Color}">
-
-                        <TextBlock Style="{StaticResource PageTitle}">Other Tools</TextBlock>
-                        <TextBlock Style="{StaticResource ParagraphText}">
-                            Tools not directly related to N64 models
-                        </TextBlock>
-
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
-
-
-                        <TabControl Margin="5 10" Padding="5" BorderThickness="1" Background="{StaticResource BG_Color}">
-
-                            <TabItem>
+                            <TabItem Name="TabOtherToolsNegative">
                                 <TabItem.Header>
-                                    <TextBlock Text="Negative Picture"/>
+                                    <TextBlock Text="{StaticResource TextHeaderNegativePicture}"/>
                                 </TabItem.Header>
-                                <StackPanel Background="{StaticResource BG_Color}">
-                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Style="{StaticResource SubParagraphText}">
-                                            Creates the Negative of a picture
-                                    </TextBlock>
+                                <StackPanel AllowDrop="True" Drop="NegativePictureDrag_Drop">
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <TextBlock Style="{StaticResource ToolParagraphDescription}" Text="{StaticResource TextDescriptionNegativePicture}" />
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
 
-                                    <Separator Margin="{StaticResource MarginSeparator}"/>
-                                    
-                                    <TextBlock Style="{StaticResource BrowseText}">Select a picture</TextBlock>
-
-                                    
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridSingleElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBox Name="NegativeBrowseBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="NegativeBrowseBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="NegativeDragDrop_Drop"/>
-                                        <Button Name="NegativeBrowseButton" Style="{StaticResource BrowseFileButton}" Grid.Column="1" Click="NegativeBrowseButton_Click">Browse</Button>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelPicture}" />
+                                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="NegativePictureTextBox" TextChanged="NegativePictureTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="NegativePictureDrag_Drop" />
+
+                                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="NegativePictureBrowseButton" Click="NegativePictureBrowseButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                                        </Button>
                                     </Grid>
 
-                                    <Button Name="NegativeSaveButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="NegativeSaveButton_Click">Create Negative</Button>
+                                    <Grid Style="{StaticResource GridLastElement}">
+                                        <Button Style="{StaticResource ToolExecuteButton}" Name="NegativePictureExecuteButton" IsEnabled="False" Click="NegativePictureExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonNegativePicture}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
 
-
-                                    <Separator Margin="{StaticResource MarginSeparator}"/>
-
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridSingleElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="*" />
+                                            <RowDefinition Style="{StaticResource GridRowSizeAuto}"/>
+                                            <RowDefinition Style="{StaticResource GridRowSize1}"/>
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Column="0" Style="{StaticResource FlipMirrorImageText}">Base Image</TextBlock>
-                                        <Image Grid.Column="0" Grid.Row="1" Source="./Images/Base_32.png" Style="{StaticResource FlipMirrorImage}"/>
+                                        <TextBlock Grid.Column="0" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageBase}" />
+                                        <Image Grid.Column="0" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageBase}" />
 
-                                        <TextBlock Grid.Column="1" Style="{StaticResource FlipMirrorImageText}">Negative</TextBlock>
-                                        <Image Grid.Column="1" Grid.Row="1" Source="./Images/Base_32_Negative.png" Style="{StaticResource FlipMirrorImage}"/>
+                                        <TextBlock Grid.Column="1" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageNegative}" />
+                                        <Image Grid.Column="1" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageNegative}" />
 
-                                        <TextBlock Grid.Column="2" Style="{StaticResource FlipMirrorImageText}">Base Image 2</TextBlock>
-                                        <Image Grid.Column="2" Grid.Row="1" Source="./Images/Base_32_BW.png" Style="{StaticResource FlipMirrorImage}"/>
+                                        <TextBlock Grid.Column="2" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageBaseBW}" />
+                                        <Image Grid.Column="2" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageBaseBW}" />
 
-                                        <TextBlock Grid.Column="3" Style="{StaticResource FlipMirrorImageText}">Negative 2</TextBlock>
-                                        <Image Grid.Column="3" Grid.Row="1" Source="./Images/Base_32_BW_Negative.png" Style="{StaticResource FlipMirrorImage}"/>
-
+                                        <TextBlock Grid.Column="3" Grid.Row="0" Style="{StaticResource ToolTableTextHeader}" Text="{StaticResource TextImageNegativeBW}" />
+                                        <Image Grid.Column="3" Grid.Row="1" Style="{StaticResource ToolTableImage}" Source="{StaticResource PathImageNegativeBW}" />
                                     </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
                                 </StackPanel>
                             </TabItem>
+
+                            <!--#endregion-->
+
                         </TabControl>
-                    </StackPanel>
-                </TabItem>
-                
-                <!-- Blacklist -->
-                <TabItem IsEnabled="True">
-                    <TabItem.Header>
-                        <TextBlock Text="Textures Blacklist Settings"/>
-                    </TabItem.Header>
+                    </Grid>
 
-                    <StackPanel Background="{StaticResource BG_Color}">
+                </DockPanel>
+            </TabItem>
 
-                        <TextBlock Style="{StaticResource PageTitle}">Textures Blacklist Settings</TextBlock>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource ParagraphText}">
-                             Manage settings for the textures blacklist<LineBreak/>
-                                        • Add &amp; Delete Games<LineBreak/>
-                                        • Add &amp; Delete Textures for each Game<LineBreak/>
-                                        • Copy all Blacklisted Textures from a Game into a Folder
-                            </TextBlock>
-                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource ParagraphText}" TextWrapping="WrapWithOverflow">
-                                 If you check the option 
-                                <TextBlock FontWeight="Light" FontStyle="Italic">Delete Objects through Blacklist</TextBlock> 
-                                in Modify Obj, every objects of a model that is using one of the blacklisted texture will get deleted
-                            </TextBlock>
-                            
+            <!--#endregion-->
+
+            <!--#region Settings-->
+
+            <TabItem Name="TabSettings">
+                <TabItem.Header>
+                    <TextBlock Text="{StaticResource TextTitleSettings}"/>
+                </TabItem.Header>
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource ToolPageTitle}" Text="{StaticResource TextTitleSettings}" />
+                        <Grid Style="{StaticResource GridPageDescription}">
+                            <TextBlock Style="{StaticResource ToolPageDescription}" Text="{StaticResource TextDescriptionSettingsPage}" />
                         </Grid>
-                        
+                        <ContentControl Content="{StaticResource ToolSeparator}"/>
+                    </StackPanel>
+                    <Grid Style="{StaticResource GridFirstElement}">
+                        <TabControl Style="{StaticResource ToolSubTabsStyle}">
 
-                        <Separator Margin="{StaticResource MarginSeparator}"/>
+                            <!--#region Settings - BlackList Configs-->
 
-                        <TabControl Height="Auto" Grid.Row="0" Margin="5" BorderThickness="1" Background="{StaticResource BG_Color}">
-                            <TabItem>
+                            <TabItem Name="TabSettingsBlackListConfigs">
                                 <TabItem.Header>
-                                    <TextBlock Text="Add/Delete Games"/>
+                                    <TextBlock Text="{StaticResource TextHeaderBlackListConfigs}"/>
                                 </TabItem.Header>
                                 <StackPanel>
-
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridSingleElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize6}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Style="{StaticResource BrowseText}">Write a game name</TextBlock>
+                                        <ContentControl Grid.Column="0" Content="{StaticResource TextBlockDescriptionBlackListInfo}" />
+                                        <Button Grid.Column="1" Style="{StaticResource ToolOptionButton}" Name="BlackListConfigSaveButton" Click="BlackListConfigSaveButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonSaveSettings}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
 
-                                            <TextBox Name="BlacklistAddGameBox" Style="{StaticResource BrowseBox}" TextChanged="BlacklistAddGameBox_TextChanged"/>
-                                            <Button Name="BlacklistAddGameButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="BlacklistAddGameButton_Click">Add Game</Button>
-                                        </StackPanel>
+                                    <Grid Style="{StaticResource GridFirstElement}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize6}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" Style="{StaticResource ToolOptionComboBox}" Name="BlackListConfigComboBox" IsEnabled="False"
+										ItemsSource="{Binding}" ItemTemplate="{StaticResource ToolBlackListTemplate}" SelectionChanged="BlackListConfigComboBox_SelectionChanged" />
 
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock Style="{StaticResource BrowseText}">Select a game</TextBlock>
-
-                                            <ComboBox Name="BlacklistDeleteGameSelect" Margin="10 5" Padding="5"
-                                                                      ItemsSource="{Binding}" ItemTemplate="{StaticResource GameBlackListTemplate}" SelectionChanged="BlacklistDeleteGameSelect_SelectionChanged" />
-
-                                            <Button Name="BlacklistDeleteGameButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="BlacklistDeleteGameButton_Click">Delete Game</Button>
-                                        </StackPanel>
-
+                                        <Button Grid.Column="1" Style="{StaticResource ToolOptionButton}" Name="BlackListConfigAddButton" Click="BlackListConfigAddButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonAdd}"/>
+                                        </Button>
                                     </Grid>
 
+                                    <StackPanel Name="BlackListConfigContainer" Visibility="Visible">
+                                        <Grid Style="{StaticResource GridSingleElement}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelButtonName}" />
+                                            <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="BlackListConfigName" Text="{Binding Name, Mode=TwoWay}" />
+                                        </Grid>
+                                        <Grid Style="{StaticResource GridLastElement}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize6}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Style="{StaticResource ToolOptionButton}" Name="BlackListConfigDeleteButton" Click="BlackListConfigDeleteButton_Click"  >
+                                                <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonDelete}"/>
+                                            </Button>
+                                        </Grid>
+                                    </StackPanel>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
                                 </StackPanel>
                             </TabItem>
-                            <TabItem>
+
+                            <!--#endregion-->
+
+                            <!--#region Settings - BlackList Textures-->
+
+                            <TabItem Name="TabSettingsBlackListTextures">
                                 <TabItem.Header>
-                                    <TextBlock Text="Add/Delete Textures"/>
+                                    <TextBlock Text="{StaticResource TextHeaderBlackListTextures}"/>
                                 </TabItem.Header>
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Top">
+                                        <Grid Style="{StaticResource GridSingleElement}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize6}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ContentControl Grid.Column="0" Content="{StaticResource TextBlockDescriptionBlackListTextures}" />
+                                            <Button Grid.Column="1" Style="{StaticResource ToolOptionButton}" Name="BlackListTexturesSaveButton" Click="BlackListTexturesSaveButton_Click" >
+                                                <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonSaveSettings}"/>
+                                            </Button>
+                                        </Grid>
+                                        <ContentControl Content="{StaticResource ToolSeparator}"/>
 
-
-                                <StackPanel Grid.Row="0" Background="{StaticResource BG_Color}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="3*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <Grid Margin="5 5 5 0">
+                                        <Grid Style="{StaticResource GridFirstElement}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                                <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelButtonName}" />
+                                            <ComboBox Grid.Column="1" Style="{StaticResource ToolOptionComboBox}" Name="BlackListTexturesComboBox" IsEnabled="False"
+											    ItemsSource="{Binding}" ItemTemplate="{StaticResource ToolBlackListTemplate}" SelectionChanged="BlackListTexturesComboBox_SelectionChanged" />
+                                            <Grid Grid.Column="2">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="4*"/>
-                                                    <ColumnDefinition Width="*"/>
-
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                                    <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" FontWeight="SemiBold" TextAlignment="Left" VerticalAlignment="Center">Game:</TextBlock>
-
-
-                                                <ComboBox Name="BlacklistTextureGameSelect" Grid.Column="1" Padding="5"
-                                                    ItemsSource="{Binding}" ItemTemplate="{StaticResource GameBlackListTemplate}" SelectionChanged="BlacklistTextureGameSelect_SelectionChanged" />
-
-
+                                                <Button Grid.Column="0" Style="{StaticResource ToolOptionButton}" Name="BlackListTexturesAddButton" IsEnabled="False" Click="BlackListTexturesAddButton_Click" >
+                                                    <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonAddFiles}"/>
+                                                </Button>
+                                                <Button Grid.Column="1" Style="{StaticResource ToolOptionButton}" Name="BlackListTexturesRemoveButton" IsEnabled="False" Click="BlackListTexturesRemoveButton_Click" >
+                                                    <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelButtonRemoveFiles}"/>
+                                                </Button>
                                             </Grid>
-                                            <TextBlock Margin="5 5 5 0" FontWeight="SemiBold">Blacklisted Textures:</TextBlock>
-                                        </StackPanel>
-
-                                        <Button Name="BlacklistTextureAddButton" Grid.Column="1" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="BlacklistTextureAddButton_Click" >Add Textures</Button>
-                                        <Button Name="BlacklistTextureDeleteButton" Grid.Column="2" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="BlacklistTextureDeleteButton_Click" >Delete Selected</Button>
-                                        <Button Name="BlacklistTextureSaveButton" Grid.Column="3" Style="{StaticResource SaveButtonRight}" IsEnabled="False" Click="BlacklistTextureSaveButton_Click" >Save Changes</Button>
+                                        </Grid>
+                                    </StackPanel>
+                                    <Grid Style="{StaticResource GridFirstElement}" DockPanel.Dock="Bottom" Name="BlackListTexturesBoxGrid">
+                                        <ListBox Name="BlackListTexturesBox" Style="{StaticResource StyleMergeObjText}" AllowDrop="True" Drop="BlackListTexturesDrag_Drop" 
+                                                 SelectionMode="Extended" 
+                                                 MaxHeight="{Binding ElementName=BlackListTexturesBoxGrid, Path=ActualHeight}"
+                                                 ItemsSource="{Binding}" ItemTemplate="{StaticResource ToolBlackListTemplateBox}" SelectionChanged="BlackListTexturesBox_SelectionChanged"/>
                                     </Grid>
-
-                                    <ListBox Name="BlacklistTextureBox" Height="200" Margin="10 5" SelectionMode="Extended"
-                                       ItemsSource="{Binding}" ItemTemplate="{StaticResource TextureBlackListTemplate}" SelectionChanged="BlacklistTextureBox_SelectionChanged"
-                                             AllowDrop="True" Drop="BlacklistTextureBox_Drop"/>
-
-                                </StackPanel>
-
+                                </DockPanel>
                             </TabItem>
 
-                            <TabItem>
+                            <!--#endregion-->
+                            <!--#region Settings - BlackList Copy Files-->
+
+                            <TabItem Name="TabSettingsBlackListCopy">
                                 <TabItem.Header>
-                                    <TextBlock Text="Copy Textures"/>
+                                    <TextBlock Text="{StaticResource TextHeaderBlackListCopy}"/>
                                 </TabItem.Header>
+                                <StackPanel AllowDrop="True" Drop="BlackListCopyDrag_Drop">
+                                    <Grid Style="{StaticResource GridSingleElement}">
+                                        <ContentControl Content="{StaticResource TextBlockDescriptionBlackListCopy}"/>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
 
-                                <StackPanel Background="{StaticResource BG_Color}">
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridFirstElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize4}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize2}"/>
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Style="{StaticResource BrowseText}">Select a game</TextBlock>
-
-                                            <ComboBox Name="BlacklistCopyGameSelect" Margin="10 5" Padding="5"
-                                                                      ItemsSource="{Binding}" ItemTemplate="{StaticResource GameBlackListTemplate}" SelectionChanged="BlacklistCopyGameSelect_SelectionChanged" />
-
-                                        </StackPanel>
-
-
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelButtonName}" />
+                                        <ComboBox Grid.Column="1" Style="{StaticResource ToolOptionComboBox}" Name="BlackListCopyComboBox" IsEnabled="False"
+											    ItemsSource="{Binding}" ItemTemplate="{StaticResource ToolBlackListTemplate}" SelectionChanged="BlackListCopyComboBox_SelectionChanged" />
 
                                     </Grid>
-
-                                    <TextBlock Style="{StaticResource BrowseText}">Select the output folder</TextBlock>
-                                    <Grid>
+                                    <Grid Style="{StaticResource GridSingleElement}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize5}"/>
+                                            <ColumnDefinition Style="{StaticResource GridColumnSize1}"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBox Name="BlacklistCopyTextureOutputBox" Style="{StaticResource BrowseBox}" Grid.Column="0" TextChanged="BlacklistCopyTextureOutputBox_TextChanged" PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="BlacklistCopyTexture_Drop" />
-                                        <Button Name="BlacklistCopyTextureOutputButton" Style="{StaticResource BrowseFolderButton}" Grid.Column="1" Click="BlacklistCopyTextureOutputButton_Click" >Browse</Button>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ToolOptionLabel}" Text="{StaticResource TextLabelDirectoryOutput}" />
+                                        <TextBox Grid.Column="1" Style="{StaticResource ToolOptionTextBox}" Name="BlackListCopyDirOutputTextBox" TextChanged="BlackListCopyDirOutputTextBox_TextChanged"
+                                                PreviewDragOver="DragOverTextBoxFix" PreviewDragEnter="DragOverTextBoxFix" PreviewDrop="BlackListCopyDrag_Drop" />
+
+                                        <Button Grid.Column="2" Style="{StaticResource ToolOptionButton}" Name="BlackListCopyBrowseButton" Click="BlackListCopyBrowseButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextLabelBrowseButton}"/>
+                                        </Button>
                                     </Grid>
-                                    
-                                    <Button Name="BlacklistCopyTextureButton" Style="{StaticResource SaveButtonCenter}" IsEnabled="False" Click="BlacklistCopyTextureButton_Click" >Copy Textures</Button>
 
-
+                                    <Grid Style="{StaticResource GridLastElement}">
+                                        <Button Style="{StaticResource ToolExecuteButton}" Name="BlackListCopyExecuteButton" IsEnabled="False" Click="BlackListCopyExecuteButton_Click" >
+                                            <TextBlock Style="{StaticResource ToolOptionButtonLabel}" Text="{StaticResource TextTitleCopyTextures}"/>
+                                        </Button>
+                                    </Grid>
+                                    <ContentControl Content="{StaticResource ToolSeparator}"/>
                                 </StackPanel>
-                                
-
                             </TabItem>
-                            
 
+                            <!--#endregion-->
 
                         </TabControl>
-                    </StackPanel>
+                    </Grid>
 
-                </TabItem>
-                
-            </TabControl>
-        </StackPanel>
+                </DockPanel>
+            </TabItem>
+
+            <!--#endregion-->
+
+        </TabControl>
 
     </Border>
 </Window>

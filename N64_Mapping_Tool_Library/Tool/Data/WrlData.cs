@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using N64Library.Tool.Utils;
 
-namespace N64Library.Tool.WrlFiles
+namespace N64Library.Tool.Data
 {
     public class WrlData
     {
@@ -125,14 +125,15 @@ namespace N64Library.Tool.WrlFiles
         {
             // 0, 1, 2, -1,
             List<int> indexes = new List<int>();
-            string[] lineSplit = Helper.SplitByCommaSpace(Helper.TrimEndComma(line)); // Split each index
+            string[] lineSplit = GenericUtils.SplitByCommaSpace(GenericUtils.TrimEndComma(line)); // Split each index
             foreach (string c in lineSplit)
             {
                 if (c != "-1") // -1 is the end of a line
                 {
-                    int? index = Helper.StringToInt(c);
-                    if (index != null)
-                        indexes.Add((int)index);
+                    if (Int32.TryParse(c, out int index))
+                    {
+                        indexes.Add(index);
+                    }
                 }
             }
             return indexes;

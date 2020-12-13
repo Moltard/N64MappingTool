@@ -5,18 +5,40 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 
 namespace N64Library.Tool.Utils
 {
 
-    public class ImageHelper
+    public static class ImageUtilsShared
     {
 
         /// <summary>
         /// Represents a transparent pixel
         /// </summary>
         private static readonly System.Drawing.Color transparentPixel = System.Drawing.Color.FromArgb(0, 0, 0, 0); // Pixel with Alpha 0
+
+        /// <summary>
+        /// Try to save an Image to a given path then Dispose of the data
+        /// </summary>
+        /// <param name="img">The Image to save</param>
+        /// <param name="outputFile">The file to create</param>
+        /// <returns>Return true if successful, false otherwise</returns>
+        public static bool TrySaveImageDispose(Image img, string outputFile)
+        {
+            try
+            {
+                img.Save(outputFile);
+            }
+            catch
+            {
+                return false; // If impossible to delete
+            }
+            finally
+            {
+                img.Dispose();
+            }
+            return true;
+        }
 
         /// <summary>
         /// Return a Bitmap if the given file exists, return null otherwise
@@ -124,11 +146,9 @@ namespace N64Library.Tool.Utils
                 }
                 img.Dispose(); // Allow to override the loaded picture without crashing
                 if (System.IO.File.Exists(outputFile))
-                    FileHelper.DeleteFile(outputFile); // Delete the file if it already exists
+                    FileUtilsShared.TryDeleteFile(outputFile); // Delete the file if it already exists
 
-                try { newImg.Save(outputFile); } catch { return false; }
-                newImg.Dispose();
-                return true;
+                return TrySaveImageDispose(newImg, outputFile);
             }
 
             return false;
@@ -173,11 +193,9 @@ namespace N64Library.Tool.Utils
                 }
                 img.Dispose(); // Allow to override the loaded picture without crashing
                 if (System.IO.File.Exists(outputFile))
-                    FileHelper.DeleteFile(outputFile); // Delete the file if it already exists
+                    FileUtilsShared.TryDeleteFile(outputFile); // Delete the file if it already exists
 
-                try { newImg.Save(outputFile); } catch { return false; }
-                newImg.Dispose();
-                return true;
+                return TrySaveImageDispose(newImg, outputFile);
             }
 
             return false;
@@ -216,15 +234,12 @@ namespace N64Library.Tool.Utils
                         }
                     }
 
-                    BmpA.Dispose(); // we dispose the file streams so we can overwrite the files
+                    BmpA.Dispose(); // Dispose the file streams so we can overwrite the files
                     BmpC.Dispose();
                     if (System.IO.File.Exists(outputFile))
-                        FileHelper.DeleteFile(outputFile); // Delete the file if it already exists
+                        FileUtilsShared.TryDeleteFile(outputFile); // Delete the file if it already exists
 
-                    try { newImg.Save(outputFile); } catch { return false; }
-
-                    newImg.Dispose();
-                    return true;
+                    return TrySaveImageDispose(newImg, outputFile);
                 }
             }
             return false;
@@ -257,11 +272,9 @@ namespace N64Library.Tool.Utils
                 }
                 img.Dispose(); // Allow to override the loaded picture without crashing
                 if (System.IO.File.Exists(outputFile))
-                    FileHelper.DeleteFile(outputFile); // Delete the file if it already exists
+                    FileUtilsShared.TryDeleteFile(outputFile); // Delete the file if it already exists
 
-                try { newImg.Save(outputFile); } catch { return false; }
-                newImg.Dispose();
-                return true;
+                return TrySaveImageDispose(newImg, outputFile);
             }
 
             return false;
@@ -409,7 +422,7 @@ namespace N64Library.Tool.Utils
             List<BitmapStoreData> bitmapList = new List<BitmapStoreData>();
             foreach (string fileName in listFileName)
             {
-                Bitmap img = ImageHelper.CreateBitmap(fileName);
+                Bitmap img = ImageUtilsShared.CreateBitmap(fileName);
                 if (img != null)
                 {
                     BitmapStoreData bmp = new BitmapStoreData(img);

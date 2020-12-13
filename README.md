@@ -2,7 +2,7 @@
 
 A GUI tool to convert WRL files to OBJ, modify OBJ files, modify pictures and other stuff.
 
-<img src="Images/MainGUI.jpg" width="60%" />
+<img src="Images/ObjTools_ModifyObj.jpg" width="60%" />
 
 This tool is part of a big guide about ripping Nintendo 64 models to Source Engine, and recreating Nintendo 64 maps in Source Engine.
 

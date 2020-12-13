@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using N64Library.Tool.Parser;
 using N64Library.Tool.Utils;
 
-namespace N64Library.Tool.ObjFiles
+namespace N64Library.Tool.Data
 {
    public class ObjData
     {
@@ -33,7 +34,7 @@ namespace N64Library.Tool.ObjFiles
         }
 
         /// <summary>
-        /// Merge the given obj with this one
+        /// Merge the given obj with the current one
         /// </summary>
         /// <param name="obj"></param>
         public void MergeObjData(ObjData obj)

@@ -1,10 +1,9 @@
-﻿using N64Application.Tool.Utils;
+﻿using N64Application.Tool;
+using N64Application.Tool.Utils;
 using N64Library.Tool.Utils;
-using N64Mapping.Tool;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,128 +20,145 @@ using System.Windows.Shapes;
 namespace N64Application
 {
     
-
     /// <summary>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        internal const string TexturesBlacklistXml = "TexturesBlacklist.xml";
-        internal const string SameCopyFolder = "//";
-        internal ObservableCollection<GameTexturesXml> GamesList;
-        internal ObservableCollection<string> GameTextures;
-        internal ObservableCollection<string> ObjFileList;
 
+        #region Attributes
 
-        //--------------------------------------
-        //------------- Init GUI ---------------
-        //--------------------------------------
+        /// <summary>
+        /// Used for the Merge Obj ListBox
+        /// </summary>
+        private ObservableCollection<string> mergeObjFileList;
+
+        /// <summary>
+        /// Used for the BlackList Texture ListBox
+        /// </summary>
+        private ObservableCollection<string> blackListTexturesList;
+
+        /// <summary>
+        /// Used to store the tool settings
+        /// </summary>
+        private Settings toolSettings;
+
+        #endregion
+
+        #region Constructor
 
         public MainWindow()
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
             InitializeComponent();
-            InitCopyTextures();
+            InitMergeObjList();
             InitBlackList();
-            InitObjMerge();
         }
 
-        //--------------------------------------
-        //---------- Init Obj Merge ------------
-        //--------------------------------------
+        #endregion
 
-        private void InitCopyTextures()
-        {
-            CopyTextureOutputBox.Text = SameCopyFolder;
-        }
-
-        //--------------------------------------
-        //---------- Init Obj Merge ------------
-        //--------------------------------------
-
-        private void InitObjMerge()
-        {
-            ObjFileList = new ObservableCollection<string>();
-            // Bind TextBox to the obj list
-            MergeObjSpecBox.DataContext = ObjFileList;
-        }
-
-        //--------------------------------------
-        //---------- Init BlackList ------------
-        //--------------------------------------
+        #region Initialize GUI
         
+        #region Initialize GUI - Merge Obj
+
+        private void InitMergeObjList()
+        {
+            mergeObjFileList = new ObservableCollection<string>();
+            MergeObjListBox.DataContext = mergeObjFileList;
+        }
+
+        #endregion
+
+        #region Initialize GUI - BlackList
+
         private void InitBlackList()
         {
-            if (!File.Exists(TexturesBlacklistXml))
-                SaveTexturesBlacklistXml(); // Create an empty xml
-
-            GamesList = new ObservableCollection<GameTexturesXml>(XmlHelper.ParseTextureXml(TexturesBlacklistXml));
-            GameTextures = new ObservableCollection<string>();
-
-            // Set the event handler for when the list gets modified
-            GamesList.CollectionChanged += GamesListChanged;
-
-            // Update the states of Button and ComboBox if the list is empty
-            GamesListUpdateGUI();
-
-            // Bind ComboBox to the game list
-            ObjModifyBlackListSelect.DataContext = GamesList;
-            BlacklistTextureGameSelect.DataContext = GamesList;
-            BlacklistDeleteGameSelect.DataContext = GamesList;
-            BlacklistCopyGameSelect.DataContext = GamesList;
-
-            // Bind TextBox to the texture list
-            BlacklistTextureBox.DataContext = GameTextures;
+            toolSettings = XmlUtils.GetSettings();
+            
+            if (toolSettings != null)
+            {
+                blackListTexturesList = new ObservableCollection<string>();
+                BlackListTexturesBox.DataContext = blackListTexturesList;
+                toolSettings.InitAllAttributes();
+                InitConfigComboBox();
+            }
         }
 
-
-        private void SaveTexturesBlacklistXml()
+        /// <summary>
+        /// Init the datacontext of the config combobox and set the selection to a default value
+        /// </summary>
+        private void InitConfigComboBox()
         {
-            if (GamesList != null)
-            {
-                XmlHelper.SaveTextureXml(TexturesBlacklistXml, new List<GameTexturesXml>(GamesList));
-            }
-            else
-            {
-                XmlHelper.SaveTextureXml(TexturesBlacklistXml, new List<GameTexturesXml>());
-            }
+            ObjModifyObjComboBoxBlackList.DataContext = toolSettings.BlackList;
+            BlackListConfigComboBox.DataContext = toolSettings.BlackList;
+            BlackListTexturesComboBox.DataContext = toolSettings.BlackList;
+            BlackListCopyComboBox.DataContext = toolSettings.BlackList;
+            ConfigForceSelect();
         }
 
-
-        private void GamesListChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs args)
+        /// <summary>
+        /// Set the selected BlackList Config as the selection of all Config comboboxes
+        /// </summary>
+        /// <param name="map"></param>
+        private void ConfigSetSelected(BlackListConfig config)
         {
-            GamesListUpdateGUI();
+            ObjModifyObjComboBoxBlackList.SelectedItem = config;
+            BlackListConfigComboBox.SelectedItem = config;
+            BlackListTexturesComboBox.SelectedItem = config;
+            BlackListCopyComboBox.SelectedItem = config;
         }
 
-        private void GamesListUpdateGUI()
+        /// <summary>
+        /// Force the BlackList Config Combobox to the first element if possible
+        /// </summary>
+        private void ConfigForceSelect()
         {
-            if (GamesList.Count == 0)
+            if (toolSettings.BlackList.Count > 0)
             {
-                ObjModifyBlackList.IsChecked = false;
-                ObjModifyBlackList.IsEnabled = false;
-                BlacklistDeleteGameSelect.IsEnabled = false;
-                BlacklistDeleteGameButton.IsEnabled = false;
-                BlacklistCopyGameSelect.IsEnabled = false;
-                BlacklistTextureGameSelect.IsEnabled = false;
-
-                BlacklistTextureAddButton.IsEnabled = false;
-                BlacklistTextureDeleteButton.IsEnabled = false;
-                BlacklistTextureSaveButton.IsEnabled = false;
+                ConfigSetSelected(toolSettings.BlackList[0]);
             }
-            else
-            {
-                ObjModifyBlackList.IsEnabled = true;
-                BlacklistDeleteGameSelect.IsEnabled = true;
-                BlacklistCopyGameSelect.IsEnabled = true;
-                BlacklistTextureGameSelect.IsEnabled = true;
-            }
+            ConfigListUpdateGUI();
         }
 
+        /// <summary>
+        /// Update the visibility of the Config comboboxes based on how many Configs are available
+        /// </summary>
+        private void ConfigListUpdateGUI()
+        {
+            bool hasConfigs = toolSettings.BlackList.Count > 0;
+            ObjModifyObjCkbBlackList.IsEnabled = hasConfigs;
+            ObjModifyObjComboBoxBlackList.IsEnabled = hasConfigs;
+            if (!hasConfigs)
+            {
+                ObjModifyObjCkbBlackList.IsChecked = false;
+            }
+            BlackListConfigComboBox.IsEnabled = hasConfigs;
+            BlackListTexturesComboBox.IsEnabled = hasConfigs;
+            BlackListCopyComboBox.IsEnabled = hasConfigs;
+            BlackListConfigContainer.Visibility = hasConfigs ? Visibility.Visible : Visibility.Hidden;
+        }
 
-        //-------------------------------------
-        //------- Events Drag and Drop --------
-        //-------------------------------------
+        #endregion
 
+        #endregion
+
+        #region Events Drag and Drop
+
+        /// <summary>
+        /// Allow dragging on TextBox
+        /// </summary>
+        /// <param name="e"></param>
+        private void DragOverTextBoxFix(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
+            e.Effects = DragDropEffects.Move;
+        }
+
+        /// <summary>
+        /// Return the list of dropped path for the DragDrop event
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         private string[] DragDropGetPaths(DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop, true))
@@ -166,11 +182,18 @@ namespace N64Application
             {
                 switch (mode)
                 {
+                    case DragDropMode.Any:
+                        // Get the first dragged file
+                        if (droppedFilePaths.Length > 0)
+                        {
+                            filePath = droppedFilePaths[0];
+                        }
+                        break;
                     case DragDropMode.Wrl:
-                        foreach (var path in droppedFilePaths)
+                        foreach (string path in droppedFilePaths)
                         {
                             // Get the first WRL dragged if multiple files are dragged
-                            if (FileHelper.IsFileExtension(path, GuiHelper.ExtensionWrl))
+                            if (FileUtils.IsFileExtension(path, FileConstants.ExtensionWrl))
                             {
                                 filePath = path;
                                 break;
@@ -178,10 +201,10 @@ namespace N64Application
                         }
                         break;
                     case DragDropMode.Obj:
-                        foreach (var path in droppedFilePaths)
+                        foreach (string path in droppedFilePaths)
                         {
                             // Get the first OBJ dragged if multiple files are dragged
-                            if (FileHelper.IsFileExtension(path, GuiHelper.ExtensionObj))
+                            if (FileUtils.IsFileExtension(path, FileConstants.ExtensionObj))
                             {
                                 filePath = path;
                                 break;
@@ -189,28 +212,28 @@ namespace N64Application
                         }
                         break;
                     case DragDropMode.Images:
-                        foreach (var path in droppedFilePaths)
+                        foreach (string path in droppedFilePaths)
                         {
                             // Get the first Image dragged if multiple files are dragged
-                            if (FileHelper.IsFileExtension(path, GuiHelper.ExtensionImages))
+                            if (FileUtils.IsFileExtension(path, FileConstants.ExtensionImages))
                             {
                                 filePath = path;
                                 break;
                             }
                         }
                         break;
-                    case DragDropMode.Folder:
-                        foreach (var path in droppedFilePaths)
+                    case DragDropMode.Directory:
+                        foreach (string path in droppedFilePaths)
                         {
                             // Get the directory path of the dragged files
-                            if (Directory.Exists(path))
+                            if (System.IO.Directory.Exists(path))
                             {
                                 filePath = path;
                                 break;
                             }
-                            else if (File.Exists(path))
+                            else if (System.IO.File.Exists(path))
                             {
-                                filePath = FileHelper.GetDirectoryName(path);
+                                filePath = System.IO.Path.GetDirectoryName(path);
                                 break;
                             }
                         }
@@ -222,1767 +245,1579 @@ namespace N64Application
             return filePath;
         }
 
+        #endregion
+
+        #region Events Generic Functions
+        
         /// <summary>
-        /// Allow dragging on TextBox
+        /// Create a HashSet with a given string array and a string ICollection
         /// </summary>
-        /// <param name="e"></param>
-        private void DragOverTextBoxFix(object sender, DragEventArgs e)
+        /// <param name="filePathList"></param>
+        /// <param name="initialList"></param>
+        /// <returns></returns>
+        private HashSet<string> GetHashsetFromFileList(string[] filePathList, ICollection<string> initialList = null)
         {
-            e.Handled = true;
-            e.Effects = DragDropEffects.Move;
+            HashSet<string> newFileList = initialList != null ? new HashSet<string>(initialList) : new HashSet<string>();
+            foreach (string filePath in filePathList)
+            {
+                newFileList.Add(filePath);
+            }
+            return newFileList;
         }
 
+        #endregion
 
-        
+        #region Events Wrl To Obj
 
-        
-
-        //--------------------------------------
-        //-------- Events Wrl To Obj -----------
-        //--------------------------------------
-
-        private void WrlBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void WrlFileTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (WrlBrowseBox.Text != string.Empty)
-                WrlSaveButton.IsEnabled = true;
-            else
-                WrlSaveButton.IsEnabled = false;
+            bool isNotEmpty = !String.IsNullOrEmpty(WrlFileTextBox.Text);
+            WrlConvertExecuteButton.IsEnabled = isNotEmpty;
         }
 
-        private void WrlBrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            string fileName = GuiHelper.OpenFileDialog(FileFilters.Wrl);
-            if (fileName != null)
-                WrlBrowseBox.Text = fileName;
-        }
-
-        private void WrlDragDrop_Drop(object sender, DragEventArgs e)
+        private void WrlFileDrag_Drop(object sender, DragEventArgs e)
         {
             string filePath = DragDropGetPath(e, DragDropMode.Wrl);
             if (filePath != null)
             {
-                WrlBrowseBox.Text = filePath;
+                WrlFileTextBox.Text = filePath;
             }
         }
 
-        private Dictionary<string, string> WrlToObjDictionary(string wrlFilename, string objOutput)
+        private void WrlFileBrowseButton_Click(object sender, RoutedEventArgs e)
         {
-            var dict = new Dictionary<string, string>
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Wrl);
+            if (filePath != null)
             {
-                { "WrlFile", wrlFilename },
-                { "ObjOutput", objOutput }
-            };
-            return dict;
-        }
-        
-        private ObjOptions GetWrlToObjOptions()
-        {
-            ObjOptions options = new ObjOptions();
-
-            // Reverse Vertex Order
-            if ((bool)WrlModifyVertex.IsChecked) options |= ObjOptions.ReverseVertex;
-
-            return options;
+                WrlFileTextBox.Text = filePath;
+            }
         }
 
-        private void WrlSaveButton_Click(object sender, RoutedEventArgs e)
+        private void WrlConvertExecuteButton_Click(object sender, RoutedEventArgs e)
         {
-            string wrlFileName = WrlBrowseBox.Text;
-            if (wrlFileName != string.Empty)
+            string wrlFilePath = WrlFileTextBox.Text;
+            if (!String.IsNullOrEmpty(wrlFilePath))
             {
-                if (File.Exists(wrlFileName))
+                if (System.IO.File.Exists(wrlFilePath))
                 {
-                    if (FileHelper.IsFileExtension(wrlFileName,GuiHelper.ExtensionWrl))
+                    if (FileUtils.IsFileExtension(wrlFilePath, FileConstants.ExtensionWrl))
                     {
-                        string directoryOutput = FileHelper.GetDirectoryName(wrlFileName);
                         ActionN64 action = ActionN64.WrlConversion;
-                        string objFileName = GuiHelper.SaveFileDialog(action, directoryOutput);
-                        if (objFileName != null) // A filename was picked
+                        string objOutputPath = FileUtils.SaveFileDialogPresetFileName(action, 
+                            System.IO.Path.GetFileNameWithoutExtension(wrlFilePath), 
+                            System.IO.Path.GetDirectoryName(wrlFilePath));
+                        if (!String.IsNullOrEmpty(objOutputPath))
                         {
-                            bool success = Start.Tool(action, WrlToObjDictionary(wrlFileName, objFileName), GetWrlToObjOptions());
-                            MessagesHandler.DisplayMessageSuccessFailed(success);
+                            ToolResult result = Start.ToolObj(action, WrlGetDataDictionary(wrlFilePath, objOutputPath), WrlGetObjOptions());
+                            MessageBoxUtils.ShowMessageExecution(result);
                         }
                     }
                     else
                     {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtension, GuiHelper.ExtensionWrl);
-                        WrlBrowseBox.Focus();
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotExtension + FileConstants.ExtensionWrl);
+                        WrlFileTextBox.Focus();
                     }
                 }
                 else
                 {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    WrlBrowseBox.Focus();
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                    WrlFileTextBox.Focus();
                 }
             }
             else
             {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                WrlBrowseBox.Focus();
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                WrlFileTextBox.Focus();
             }
         }
 
-        // Wrls to Obj
-        
-        private void WrlsBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (WrlsBrowseBox.Text != string.Empty)
-                WrlsSaveButton.IsEnabled = true;
-            else
-                WrlsSaveButton.IsEnabled = false;
-        }
-
-        private void WrlsBrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            string folderName = GuiHelper.OpenFolderDialog();
-            if (folderName != null)
-            {
-                WrlsBrowseBox.Text = folderName;
-            }
-        }
-
-        private void WrlsDragDrop_Drop(object sender, DragEventArgs e)
-        {
-            string filePath = DragDropGetPath(e, DragDropMode.Folder);
-            if (filePath != null)
-            {
-                WrlsBrowseBox.Text = filePath;
-            }
-        }
-
-        private Dictionary<string, string> WrlsToObjDictionary(string wrlDirectory)
+        private Dictionary<string, string> WrlGetDataDictionary(string wrlFilePath, string objOutputPath)
         {
             var dict = new Dictionary<string, string>
             {
-                { "WrlDirectory", wrlDirectory }
+                { DictConstants.WrlFile, wrlFilePath },
+                { DictConstants.ObjOutput, objOutputPath }
             };
             return dict;
         }
 
-        private ObjOptions GetWrlsToObjOptions()
+        private ObjOptions WrlGetObjOptions()
         {
             ObjOptions options = new ObjOptions();
-
-            // Reverse Vertex Order
-            if ((bool)WrlsModifyVertex.IsChecked) options |= ObjOptions.ReverseVertex;
-
+            if (WrlReverseVertexCheckbox.IsChecked == true)
+            {
+                options |= ObjOptions.ReverseVertex;
+            }
             return options;
         }
 
-        private void WrlsSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            string wrlFolder = WrlsBrowseBox.Text;
-            if (wrlFolder != string.Empty)
-            {
-                if (Directory.Exists(wrlFolder))
-                {
-                    string message = string.Format("This will convert every .wrl file in the selected directory and its subdirectories:\n{0}\nDo you confirm ?", wrlFolder);
-                    // AskYesNoQuestion
+        #endregion
 
-                    bool resultQuestion = MessagesHandler.AskYesNoQuestion(message);
+        #region Events Wrls To Obj
+
+        private void WrlsDirectoryTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            bool isNotEmpty = !String.IsNullOrEmpty(WrlsDirectoryTextBox.Text);
+            WrlsConvertExecuteButton.IsEnabled = isNotEmpty;
+        }
+
+        private void WrlsDirectoryDrag_Drop(object sender, DragEventArgs e)
+        {
+            string directoryPath = DragDropGetPath(e, DragDropMode.Directory);
+            if (directoryPath != null)
+            {
+                WrlsDirectoryTextBox.Text = directoryPath;
+            }
+        }
+
+        private void WrlsDirectoryBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string directoryPath = FileUtils.OpenDirectoryDialog();
+            if (directoryPath != null)
+            {
+                WrlsDirectoryTextBox.Text = directoryPath;
+            }
+        }
+
+        private void WrlsConvertExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string wrlDirectoryPath = WrlsDirectoryTextBox.Text;
+            if (!String.IsNullOrEmpty(wrlDirectoryPath))
+            {
+                if (System.IO.Directory.Exists(wrlDirectoryPath))
+                {
+
+                    bool resultQuestion = MessageBoxUtils.ShowMessageYesNoQuestion(MessageBoxConstants.MessageWrlConvertRecursive);
                     if (resultQuestion)
                     {
                         ActionN64 action = ActionN64.WrlsConversion;
-                        bool success = Start.Tool(action, WrlsToObjDictionary(wrlFolder), GetWrlsToObjOptions());
-                        MessagesHandler.DisplayMessageSuccessFailed(success);
+                        ToolResult result = Start.ToolObj(action, WrlsGetDataDictionary(wrlDirectoryPath), WrlsGetObjOptions());
+                        MessageBoxUtils.ShowMessageExecution(result);
                     }
                 }
                 else
                 {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.DirectoryNotExists);
-                    WrlBrowseBox.Focus();
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageDirectoryNotFound);
+                    WrlsDirectoryTextBox.Focus();
                 }
             }
             else
             {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                WrlBrowseBox.Focus();
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                WrlsDirectoryTextBox.Focus();
             }
         }
 
-        //--------------------------------------
-        //--------- Events Obj Tools -----------
-        //--------------------------------------
-
-        private void ObjBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
+        private Dictionary<string, string> WrlsGetDataDictionary(string wrlDirectoryPath)
         {
-            bool notEmpty = (ObjBrowseBox.Text != string.Empty);
-
-            ObjDeleteMaterialsButton.IsEnabled = notEmpty;
-            ObjDeleteUnusedMaterialsButton.IsEnabled = notEmpty;
-            ObjAddMaterialsButton.IsEnabled = notEmpty;
-            ObjModifyButton.IsEnabled = notEmpty;
-            ObjToSmdButton.IsEnabled = notEmpty;
-            RefModelToSmdButton.IsEnabled = notEmpty;
-            CopyTextureUpdateGUI();
-
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.WrlDirectory, wrlDirectoryPath }
+            };
+            return dict;
         }
 
-        private void ObjBrowseButton_Click(object sender, RoutedEventArgs e)
+        private ObjOptions WrlsGetObjOptions()
         {
-            string fileName = GuiHelper.OpenFileDialog(FileFilters.Obj);
-            if (fileName != null)
-                ObjBrowseBox.Text = fileName;
+            ObjOptions options = new ObjOptions();
+            if (WrlsReverseVertexCheckbox.IsChecked == true)
+            {
+                options |= ObjOptions.ReverseVertex;
+            }
+            return options;
         }
 
-        private void ObjDragDrop_Drop(object sender, DragEventArgs e)
+        #endregion
+
+        #region Events Obj Tools
+
+        #region Events Obj Tools - Obj File
+
+        private void ObjFileTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            bool isNotEmpty = !String.IsNullOrEmpty(ObjFileTextBox.Text);
+            ObjDeleteMaterialsExecuteButton.IsEnabled = isNotEmpty;
+            ObjDeleteUnusedMaterialsExecuteButton.IsEnabled = isNotEmpty;
+            ObjAddMaterialsExecuteButton.IsEnabled = isNotEmpty;
+            ObjModifyObjExecuteButton.IsEnabled = isNotEmpty;
+            ObjObjToSmdExecuteButton.IsEnabled = isNotEmpty;
+            ObjReferenceModelExecuteButton.IsEnabled = isNotEmpty;
+        }
+
+        private void ObjFileDrag_Drop(object sender, DragEventArgs e)
         {
             string filePath = DragDropGetPath(e, DragDropMode.Obj);
             if (filePath != null)
             {
-                ObjBrowseBox.Text = filePath;
+                ObjFileTextBox.Text = filePath;
             }
         }
 
-        private void ObjModifyUniformScale_Changed(object sender, RoutedEventArgs e)
+        private void ObjFileBrowseButton_Click(object sender, RoutedEventArgs e)
         {
-            if ((bool)ObjModifyUniformScale.IsChecked) // Checked
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Obj);
+            if (filePath != null)
             {
-                ObjModifyScaleValueXYZ.IsEnabled = true;
-                ObjModifyNonUniformScale.IsEnabled = false;
-            }
-            else // Unchecked
-            {
-                ObjModifyScaleValueXYZ.IsEnabled = false;
-                ObjModifyNonUniformScale.IsEnabled = true;
+                ObjFileTextBox.Text = filePath;
             }
         }
 
-        private void ObjModifyNonUniformScale_Changed(object sender, RoutedEventArgs e)
-        {
-            if ((bool)ObjModifyNonUniformScale.IsChecked) // Checked
-            {
-                ObjModifyScaleValueX.IsEnabled = true;
-                ObjModifyScaleValueY.IsEnabled = true;
-                ObjModifyScaleValueZ.IsEnabled = true;
-                ObjModifyUniformScale.IsEnabled = false;
-            }
-            else // Unchecked
-            {
-                ObjModifyScaleValueX.IsEnabled = false;
-                ObjModifyScaleValueY.IsEnabled = false;
-                ObjModifyScaleValueZ.IsEnabled = false;
-                ObjModifyUniformScale.IsEnabled = true;
-            }
-        }
+        #endregion
+
+        #region Events Obj Tools - Generic
         
-        private void ObjModifyRotate_Changed(object sender, RoutedEventArgs e)
+        private void ObjToolsHandleAllActions(ActionN64 action)
         {
-            if ((bool)ObjModifyRotate.IsChecked) // Checked
+            string objFilePath = ObjFileTextBox.Text;
+            if (!String.IsNullOrEmpty(objFilePath))
             {
-                ObjModifyRotateValueX.IsEnabled = true;
-                ObjModifyRotateValueY.IsEnabled = true;
-                ObjModifyRotateValueZ.IsEnabled = true;
-            }
-            else // Unchecked
-            {
-                ObjModifyRotateValueX.IsEnabled = false;
-                ObjModifyRotateValueY.IsEnabled = false;
-                ObjModifyRotateValueZ.IsEnabled = false;
-            }
-        }
-
-        private void ObjModifyBlackList_Changed(object sender, RoutedEventArgs e)
-        {
-            if ((bool)ObjModifyBlackList.IsChecked) // Checked
-            {
-                ObjModifyBlackListSelect.IsEnabled = true;
+                if (System.IO.File.Exists(objFilePath))
+                {
+                    if (FileUtils.IsFileExtension(objFilePath, FileConstants.ExtensionObj))
+                    {
+                        string fileOutputPath = FileUtils.SaveFileDialogPreset(action, System.IO.Path.GetDirectoryName(objFilePath));
+                        if (!String.IsNullOrEmpty(fileOutputPath))
+                        {
+                            ToolResult result = Start.ToolObj(action, ObjGetDataDictionary(objFilePath, fileOutputPath, action), ObjToolsGetObjOptions(action));
+                            MessageBoxUtils.ShowMessageExecution(result);
+                        }
+                    }
+                    else
+                    {
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotExtension + FileConstants.ExtensionObj);
+                        ObjFileTextBox.Focus();
+                    }
+                }
+                else
+                {
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                    ObjFileTextBox.Focus();
+                }
             }
             else
             {
-                ObjModifyBlackListSelect.IsEnabled = false;
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                ObjFileTextBox.Focus();
             }
         }
 
-        private Dictionary<string, string> ObjToolsDictionary(string objFilename, string objOutput, bool modify)
+        private Dictionary<string, string> ObjGetDataDictionary(string objFilePath, string fileOutputPath, ActionN64 action)
         {
             var dict = new Dictionary<string, string>
             {
-                { "ObjFile", objFilename },
-                { "ObjOutput", objOutput }
+                { DictConstants.ObjFile, objFilePath }
             };
-            if (modify)
+            switch (action)
             {
-                dict.Add("ScaleValue", ObjModifyScaleValueXYZ.Text);
-                dict.Add("ScaleValueX", ObjModifyScaleValueX.Text);
-                dict.Add("ScaleValueY", ObjModifyScaleValueY.Text);
-                dict.Add("ScaleValueZ", ObjModifyScaleValueZ.Text);
-                dict.Add("RotateValueX", ObjModifyRotateValueX.Text);
-                dict.Add("RotateValueY", ObjModifyRotateValueY.Text);
-                dict.Add("RotateValueZ", ObjModifyRotateValueZ.Text);        
+                case ActionN64.DeleteMaterials:
+                case ActionN64.DeleteUnusedMaterials:
+                case ActionN64.AddMaterials:
+                    dict.Add(DictConstants.ObjOutput, fileOutputPath);
+                    break;
+                case ActionN64.ModifyObj:
+                    dict.Add(DictConstants.ObjOutput, fileOutputPath);
+                    dict.Add(DictConstants.ScaleValue, ObjModifyObjTextBoxScaleUni.Text);
+                    dict.Add(DictConstants.ScaleValueX, ObjModifyObjTextBoxScaleNonUniX.Text);
+                    dict.Add(DictConstants.ScaleValueY, ObjModifyObjTextBoxScaleNonUniY.Text);
+                    dict.Add(DictConstants.ScaleValueZ, ObjModifyObjTextBoxScaleNonUniZ.Text);
+                    dict.Add(DictConstants.RotateValueX, ObjModifyObjTextBoxRotateX.Text);
+                    dict.Add(DictConstants.RotateValueY, ObjModifyObjTextBoxRotateY.Text);
+                    dict.Add(DictConstants.RotateValueZ, ObjModifyObjTextBoxRotateZ.Text);
+                    break;
+                case ActionN64.ObjToSmd:
+                    dict.Add(DictConstants.SmdOutput, fileOutputPath);
+                    break;
+                case ActionN64.RefModelSmd:
+                    dict.Add(DictConstants.SmdOutput, fileOutputPath);
+                    dict.Add(DictConstants.ScaleValue, ObjReferenceModelScaleTextBox.Text);
+                    break;
+                default:
+                    break;
             }
             return dict;
         }
-        
-        private ObjOptions GetModifyObjOptions()
+
+        private ObjOptions ObjToolsGetObjOptions(ActionN64 action)
         {
             ObjOptions options = new ObjOptions();
 
-            // Reverse Vertex Order
-            if ((bool)ObjModifyVertex.IsChecked) options |= ObjOptions.ReverseVertex;
-
-            // Merge Objects and Materials
-            if ((bool)ObjModifyMerge.IsChecked) options |= ObjOptions.Merge;
-
-            // Sort Objects and Materials
-            if ((bool)ObjModifySort.IsChecked) options |= ObjOptions.Sort;
-
-            // Uniform Scaling
-            if ((bool)ObjModifyUniformScale.IsChecked) options |= ObjOptions.UniformScale;
-
-            // Non Uniform Scaling
-            if ((bool)ObjModifyNonUniformScale.IsChecked) options |= ObjOptions.NonUniformScale;
-
-            // Rotate Model
-            if ((bool)ObjModifyRotate.IsChecked) options |= ObjOptions.Rotate;
-
-            // Textures Blacklist
-            if ((bool)ObjModifyBlackList.IsChecked)
+            switch (action)
             {
-                var selectedGame = ObjModifyBlackListSelect.SelectedValue;
-                if (selectedGame != null)
-                {
-                    if (selectedGame.GetType().Equals(typeof(GameTexturesXml))) // Safe check
+                case ActionN64.ModifyObj:
+                    if (ObjModifyObjCkbReverseVertex.IsChecked == true) { options |= ObjOptions.ReverseVertex; }
+                    if (ObjModifyObjCkbMerge.IsChecked == true) { options |= ObjOptions.Merge; }
+                    if (ObjModifyObjCkbSort.IsChecked == true) { options |= ObjOptions.Sort; }
+                    if (ObjModifyObjCkbScaleUni.IsChecked == true) { options |= ObjOptions.UniformScale; }
+                    if (ObjModifyObjCkbScaleNonUni.IsChecked == true) { options |= ObjOptions.NonUniformScale; }
+                    if (ObjModifyObjCkbRotate.IsChecked == true) { options |= ObjOptions.Rotate; }
+                    if (ObjModifyObjCkbBlackList.IsChecked == true)
                     {
-                        Start.texturesList.Clear();
-                        Start.texturesList.AddRange(((GameTexturesXml)selectedGame).Textures);
                         options |= ObjOptions.BlackList;
+                        var selected = ObjModifyObjComboBoxBlackList.SelectedItem;
+                        if (selected != null)
+                        {
+                            var config = (BlackListConfig)selected;
+                            Start.texturesList.Clear();
+                            Start.texturesList.AddRange(config.Textures);
+                        }
                     }
-                }
+                    break;
+                case ActionN64.ObjToSmd:
+                    if (ObjObjToSmdRadioTexture.IsChecked == true) { options |= ObjOptions.SmdUseTextureName; }
+                    break;
             }
-
             return options;
         }
 
-        private void ObjToolsButtons_Click(ActionN64 action)
+        #endregion
+
+        #region Events Obj Tools - Delete/Add Materials
+
+        private void ObjDeleteMaterialsExecuteButton_Click(object sender, RoutedEventArgs e)
         {
-            string objFileName = ObjBrowseBox.Text;
-            if (objFileName != string.Empty)
+            ObjToolsHandleAllActions(ActionN64.DeleteMaterials);
+        }
+
+        private void ObjDeleteUnusedMaterialsExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            ObjToolsHandleAllActions(ActionN64.DeleteUnusedMaterials);
+        }
+
+        private void ObjAddMaterialsExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            ObjToolsHandleAllActions(ActionN64.AddMaterials);
+        }
+
+        #endregion
+
+        #region Events Obj Tools - Obj to Smd/Reference Model
+
+        private void ObjObjToSmdExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            ObjToolsHandleAllActions(ActionN64.ObjToSmd);
+        }
+
+        private void ObjReferenceModelExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            ObjToolsHandleAllActions(ActionN64.RefModelSmd);
+        }
+
+        #endregion
+
+        #region Events Obj Tools - Modify Obj
+
+        private void ObjModifyObjExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            ObjToolsHandleAllActions(ActionN64.ModifyObj);
+        }
+
+        private void ObjModifyObjCkbScaleUni_Changed(object sender, RoutedEventArgs e)
+        {
+            bool isChecked = ObjModifyObjCkbScaleUni.IsChecked == true;
+            ObjModifyObjTextBoxScaleUni.IsEnabled = isChecked;
+            ObjModifyObjCkbScaleNonUni.IsEnabled = !isChecked;
+            if (isChecked)
             {
-                if (File.Exists(objFileName))
-                {
-                    if (FileHelper.IsFileExtension(objFileName, GuiHelper.ExtensionObj))
-                    {
-                        string directoryOutput = FileHelper.GetDirectoryName(objFileName);
-
-                        string objOutputName = GuiHelper.SaveFileDialog(action, directoryOutput);
-                        if (objOutputName != null)
-                        {
-                            if (action == ActionN64.ModifyObj) // Modify Obj
-                            {
-                                bool success = Start.Tool(action, ObjToolsDictionary(objFileName, objOutputName, true), GetModifyObjOptions());
-                                MessagesHandler.DisplayMessageSuccessFailed(success);
-                            }
-                            else if(action == ActionN64.AddMaterials || action == ActionN64.DeleteMaterials
-                                    || action == ActionN64.DeleteUnusedMaterials) // Delete & Add Materials
-                            {
-                                bool success = Start.Tool(action, ObjToolsDictionary(objFileName, objOutputName, false), 0);
-                                MessagesHandler.DisplayMessageSuccessFailed(success);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtension, GuiHelper.ExtensionObj);
-                        ObjBrowseBox.Focus();
-                    }
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    ObjBrowseBox.Focus();
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                ObjBrowseBox.Focus();
-            }
-        }
-
-
-        private void ObjDeleteMaterialsButton_Click(object sender, RoutedEventArgs e)
-        {
-            ObjToolsButtons_Click(ActionN64.DeleteMaterials);
-        }
-        
-        private void ObjDeleteUnusedMaterialsButton_Click(object sender, RoutedEventArgs e)
-        {
-            ObjToolsButtons_Click(ActionN64.DeleteUnusedMaterials);
-        }
-
-        private void ObjAddMaterialsButton_Click(object sender, RoutedEventArgs e)
-        {
-            ObjToolsButtons_Click(ActionN64.AddMaterials);
-        }
-
-        private void ObjModifyButton_Click(object sender, RoutedEventArgs e)
-        {
-            ObjToolsButtons_Click(ActionN64.ModifyObj);
-        }
-
-        //--------------------------------------
-        //---------- Events Obj To Smd ---------
-        //--------------------------------------
-
-        private Dictionary<string, string> ObjToSmdDictionary(string objFilename, string smdOutput)
-        {
-            var dict = new Dictionary<string, string>
-            {
-                { "ObjFile", objFilename },
-                { "SmdOutput", smdOutput }
-            };
-            return dict;
-        }
-
-        private ObjOptions GetObjSmdOptions()
-        {
-            ObjOptions options = new ObjOptions();
-
-            // Use the name of the textures for the smd materials
-            if ((bool)ObjToSmdTextureCheckbox.IsChecked)
-                options |= ObjOptions.SmdUseTextureName;
-
-            return options;
-        }
-
-        private void ObjToSmdButton_Click(object sender, RoutedEventArgs e)
-        {
-            var action = ActionN64.ObjToSmd;
-            string objFileName = ObjBrowseBox.Text;
-            if (objFileName != string.Empty)
-            {
-                if (File.Exists(objFileName))
-                {
-                    if (FileHelper.IsFileExtension(objFileName, GuiHelper.ExtensionObj))
-                    {
-                        string directoryOutput = FileHelper.GetDirectoryName(objFileName);
-
-                        string smdOutputName = GuiHelper.SaveFileDialog(action, directoryOutput);
-                        if (smdOutputName != null)
-                        {
-                            bool success = Start.Tool(action, ObjToSmdDictionary(objFileName, smdOutputName), GetObjSmdOptions());
-                            MessagesHandler.DisplayMessageSuccessFailed(success);
-                        }
-                    }
-                    else
-                    {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtension, GuiHelper.ExtensionObj);
-                        ObjBrowseBox.Focus();
-                    }
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    ObjBrowseBox.Focus();
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                ObjBrowseBox.Focus();
+                ObjModifyObjCkbScaleNonUni.IsChecked = false;
             }
         }
 
-        //--------------------------------------
-        //------- Events Reference Model -------
-        //--------------------------------------
-
-        private Dictionary<string, string> RefModelDictionary(string objFilename, string smdOutput)
+        private void ObjModifyObjCkbScaleNonUni_Changed(object sender, RoutedEventArgs e)
         {
-            var dict = new Dictionary<string, string>
+            bool isChecked = ObjModifyObjCkbScaleNonUni.IsChecked == true;
+            ObjModifyObjTextBoxScaleNonUniX.IsEnabled = isChecked;
+            ObjModifyObjTextBoxScaleNonUniY.IsEnabled = isChecked;
+            ObjModifyObjTextBoxScaleNonUniZ.IsEnabled = isChecked;
+            ObjModifyObjCkbScaleUni.IsEnabled = !isChecked;
+            if (isChecked)
             {
-                { "ObjFile", objFilename },
-                { "SmdOutput", smdOutput },
-                { "ScaleValue", RefModelScaleValueXYZ.Text }
-            };
-            return dict;
-        }
-
-        private void RefModelToSmdButton_Click(object sender, RoutedEventArgs e)
-        {
-            var action = ActionN64.RefModelSmd;
-            string objFileName = ObjBrowseBox.Text;
-            if (objFileName != string.Empty)
-            {
-                if (File.Exists(objFileName))
-                {
-                    if (FileHelper.IsFileExtension(objFileName, GuiHelper.ExtensionObj))
-                    {
-                        string directoryOutput = FileHelper.GetDirectoryName(objFileName);
-
-                        string smdOutputName = GuiHelper.SaveFileDialog(action, directoryOutput);
-                        if (smdOutputName != null)
-                        {
-                            bool success = Start.Tool(action, RefModelDictionary(objFileName, smdOutputName), 0);
-                            MessagesHandler.DisplayMessageSuccessFailed(success);
-                        }
-                    }
-                    else
-                    {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtension, GuiHelper.ExtensionObj);
-                        ObjBrowseBox.Focus();
-                    }
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    ObjBrowseBox.Focus();
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                ObjBrowseBox.Focus();
+                ObjModifyObjCkbScaleUni.IsChecked = false;
             }
         }
 
-        //--------------------------------------
-        //-------- Events Copy Textures --------
-        //--------------------------------------
-
-        private void CopyTextureUpdateGUI()
+        private void ObjModifyObjCkbRotate_Changed(object sender, RoutedEventArgs e)
         {
-            bool isChecked = (bool)CopyTextureFolderCheckbox.IsChecked;
-            CopyTextureFolderBox.IsEnabled = isChecked;
-            CopyTextureFolderButton.IsEnabled = isChecked;
-
-            if (ObjBrowseBox.Text != string.Empty) // Obj File
-            {
-                if (CopyTextureOutputBox.Text != string.Empty) // Output Folder
-                {
-                    if (isChecked) // Need Texture Folder
-                    {
-                        if (CopyTextureFolderBox.Text != string.Empty) 
-                        {
-                            CopyTexturesButton.IsEnabled = true;
-                            return;
-                        }
-                    }
-                    else // Don't Need Texture Folder
-                    {
-                        CopyTexturesButton.IsEnabled = true;
-                        return;
-                    }
-                }
-            }
-            CopyTexturesButton.IsEnabled = false;
-        }
-        
-        private Dictionary<string, string> CopyTexturesDictionary(string objFilename, string outputFolder)
-        {
-            return CopyTexturesDictionary(objFilename, outputFolder, string.Empty);
+            bool isChecked = ObjModifyObjCkbRotate.IsChecked == true;
+            ObjModifyObjTextBoxRotateX.IsEnabled = isChecked;
+            ObjModifyObjTextBoxRotateY.IsEnabled = isChecked;
+            ObjModifyObjTextBoxRotateZ.IsEnabled = isChecked;
         }
 
-        private Dictionary<string, string> CopyTexturesDictionary(string objFilename, string outputFolder, string textureFolder)
+        private void ObjModifyObjCkbBlackList_Changed(object sender, RoutedEventArgs e)
         {
-            var dict = new Dictionary<string, string>
-            {
-                { "ObjFile", objFilename },
-                { "DestDir", outputFolder },
-                { "TextureDir", textureFolder },
-            };
-
-            return dict;
+            bool isChecked = ObjModifyObjCkbBlackList.IsChecked == true;
+            ObjModifyObjComboBoxBlackList.IsEnabled = isChecked;
         }
 
+        #endregion
 
-        // Output Folder
+        #endregion
 
-        private void CopyTextureOutputBox_TextChanged(object sender, TextChangedEventArgs e)
+        #region Events Copy Textures
+
+        #region Events Copy Textures - GUI
+
+        private void CopyTexturesUpdateGUI()
         {
-            CopyTextureUpdateGUI();
+            bool isObjFileNotEmpty = !String.IsNullOrEmpty(CopyTexturesObjFileTextBox.Text);
+            bool isDirOutputChecked = CopyTexturesDirOutputCheckBox.IsChecked == true;
+            bool isDirTextureChecked = CopyTexturesDirTextureCheckBox.IsChecked == true;
+            
+            // Lock or Unlock the Output Directory TextBox and Button
+            CopyTexturesDirOutputTextBox.IsEnabled = !isDirOutputChecked;
+            CopyTexturesDirOutputBrowseButton.IsEnabled = !isDirOutputChecked;
+
+            // If unchecked, use the Directory of the Obj file as the output directory
+            bool isDirOutputNotEmpty = isDirOutputChecked ? 
+                true : !String.IsNullOrEmpty(CopyTexturesDirOutputTextBox.Text);
+
+            // Lock or Unlock the Texture Directory TextBox and Button
+            CopyTexturesDirTextureTextBox.IsEnabled = isDirTextureChecked;
+            CopyTexturesDirTextureBrowseButton.IsEnabled = isDirTextureChecked;
+
+            // If unchecked, load textures from the Obj and Mtl File data
+            bool isDirTextureNotEmpty = isDirTextureChecked ? 
+                !String.IsNullOrEmpty(CopyTexturesDirTextureTextBox.Text) : true;
+
+            CopyTexturesExecuteButton.IsEnabled = isObjFileNotEmpty && isDirOutputNotEmpty && isDirTextureNotEmpty;
         }
-        
-        private void CopyTextureOutputButton_Click(object sender, RoutedEventArgs e)
+
+        #endregion
+
+        #region Events Copy Textures - Obj File
+
+        private void CopyTexturesObjFileTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string folderName = GuiHelper.OpenFolderDialog();
-            if (folderName != null)
-                CopyTextureOutputBox.Text = folderName;
+            CopyTexturesUpdateGUI();
         }
-        
-        private void CopyTextureOutputDragDrop_Drop(object sender, DragEventArgs e)
+
+        private void CopyTexturesObjFileDrag_Drop(object sender, DragEventArgs e)
         {
-            string filePath = DragDropGetPath(e, DragDropMode.Folder);
+            string filePath = DragDropGetPath(e, DragDropMode.Obj);
             if (filePath != null)
             {
-                CopyTextureOutputBox.Text = filePath;
+                CopyTexturesObjFileTextBox.Text = filePath;
             }
         }
 
-        // Texture Folder
-
-        private void CopyTextureFolderCheckbox_Changed(object sender, RoutedEventArgs e)
+        private void CopyTexturesObjFileBrowseButton_Click(object sender, RoutedEventArgs e)
         {
-            CopyTextureUpdateGUI();
-        }
-
-        private void CopyTextureFolderBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CopyTextureUpdateGUI();
-        }
-
-        private void CopyTextureFolderButton_Click(object sender, RoutedEventArgs e)
-        {
-            string folderName = GuiHelper.OpenFolderDialog();
-            if (folderName != null)
-                CopyTextureFolderBox.Text = folderName;
-        }
-
-        private void CopyTextureFolderDragDrop_Drop(object sender, DragEventArgs e)
-        {
-            string filePath = DragDropGetPath(e, DragDropMode.Folder);
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Obj);
             if (filePath != null)
             {
-                CopyTextureFolderBox.Text = filePath;
+                CopyTexturesObjFileTextBox.Text = filePath;
             }
         }
 
-        // Copy Button
-        private void CopyTexturesButton_Click(object sender, RoutedEventArgs e)
-        {
-            string objFileName = ObjBrowseBox.Text;
-            if (objFileName != string.Empty)
-            {
-                if (File.Exists(objFileName))
-                {
-                    if (FileHelper.IsFileExtension(objFileName, GuiHelper.ExtensionObj))
-                    {
-                        string outputFolder = CopyTextureOutputBox.Text;
-                        if (outputFolder.Equals(SameCopyFolder))
-                        {
-                            outputFolder = FileHelper.GetDirectoryName(objFileName);
-                        }
-                        if (!string.IsNullOrEmpty(outputFolder))
-                        {
-                            if (Directory.Exists(outputFolder))
-                            {
-                                bool isChecked = (bool)CopyTextureFolderCheckbox.IsChecked;
+        #endregion
 
-                                if (!isChecked) // Dont use Texture Folder
+        #region Events Copy Textures - Directory Output
+
+        private void CopyTexturesDirOutputCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            CopyTexturesUpdateGUI();
+        }
+
+        private void CopyTexturesDirOutputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CopyTexturesUpdateGUI();
+        }
+
+        private void CopyTexturesDirOutputDrag_Drop(object sender, DragEventArgs e)
+        {
+            string directoryPath = DragDropGetPath(e, DragDropMode.Directory);
+            if (directoryPath != null)
+            {
+                CopyTexturesDirOutputTextBox.Text = directoryPath;
+            }
+        }
+
+        private void CopyTexturesDirOutputBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string directoryPath = FileUtils.OpenDirectoryDialog();
+            if (directoryPath != null)
+            {
+                CopyTexturesDirOutputTextBox.Text = directoryPath;
+            }
+        }
+        #endregion
+
+        #region Events Copy Textures - Directory Texture
+
+        private void CopyTexturesDirTextureCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            CopyTexturesUpdateGUI();
+        }
+
+        private void CopyTexturesDirTextureTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CopyTexturesUpdateGUI();
+        }
+
+        private void CopyTexturesDirTextureDrag_Drop(object sender, DragEventArgs e)
+        {
+            string directoryPath = DragDropGetPath(e, DragDropMode.Directory);
+            if (directoryPath != null)
+            {
+                CopyTexturesDirTextureTextBox.Text = directoryPath;
+            }
+        }
+
+        private void CopyTexturesDirTextureBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string directoryPath = FileUtils.OpenDirectoryDialog();
+            if (directoryPath != null)
+            {
+                CopyTexturesDirTextureTextBox.Text = directoryPath;
+            }
+        }
+
+        #endregion
+
+        #region Events Copy Textures - Execution
+
+        private void CopyTexturesExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string objFilePath = CopyTexturesObjFileTextBox.Text;
+            if (!String.IsNullOrEmpty(objFilePath))
+            {
+                if (System.IO.File.Exists(objFilePath))
+                {
+                    string outputDirectoryPath = CopyTexturesDirOutputCheckBox.IsChecked == true ?
+                        System.IO.Path.GetDirectoryName(objFilePath) : CopyTexturesDirOutputTextBox.Text;
+
+                    if (!String.IsNullOrEmpty(outputDirectoryPath))
+                    {
+                        if (System.IO.Directory.Exists(outputDirectoryPath))
+                        {
+                            bool isDirTextureChecked = CopyTexturesDirTextureCheckBox.IsChecked == true;
+                            string textureDirectoryPath = isDirTextureChecked ? CopyTexturesDirTextureTextBox.Text : null;
+
+                            // If Texture Directory is unchecked, we load textures from the obj and mtl files
+                            bool canCopyTextures = !isDirTextureChecked;
+                            if (isDirTextureChecked)
+                            {
+                                if (!String.IsNullOrEmpty(textureDirectoryPath))
                                 {
-                                    bool success = Start.Tool(ActionN64.CopyObjTextures, CopyTexturesDictionary(objFileName, outputFolder), 0);
-                                    MessagesHandler.DisplayMessageSuccessFailed(success);
-                                }
-                                else // Use Texture Folder
-                                {
-                                    string textureFolder = CopyTextureFolderBox.Text;
-                                    if (textureFolder != string.Empty)
+                                    if (System.IO.Directory.Exists(textureDirectoryPath))
                                     {
-                                        if (Directory.Exists(textureFolder))
-                                        {
-                                            bool success = Start.Tool(ActionN64.CopyObjTextures,
-                                                CopyTexturesDictionary(objFileName, outputFolder, textureFolder), ObjOptions.CopyUseTextureDir);
-                                            MessagesHandler.DisplayMessageSuccessFailed(success);
-                                        }
-                                        else
-                                        {
-                                            MessagesHandler.DisplayMessageWarning(MessagesList.DirectoryNotExists);
-                                            CopyTextureFolderBox.Focus();
-                                        }
+                                        canCopyTextures = true;
                                     }
                                     else
                                     {
-                                        MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                                        CopyTextureFolderBox.Focus();
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                MessagesHandler.DisplayMessageWarning(MessagesList.DirectoryNotExists);
-                                CopyTextureOutputBox.Focus();
-                            }
-                                
-                        }
-                        else
-                        {
-                            MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                            CopyTextureOutputBox.Focus();
-                        }
-                    }
-                    else
-                    {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtension, GuiHelper.ExtensionObj);
-                        ObjBrowseBox.Focus();
-                    }
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    ObjBrowseBox.Focus();
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                ObjBrowseBox.Focus();
-            }
-        }
-
-
-        //--------------------------------------
-        //---------- Events Obj Merge ----------
-        //--------------------------------------
-
-        // Folder of obj
-
-        private void MergeObjFolderBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (MergeObjFolderBrowseBox.Text != string.Empty)
-                MergeObjFolderSaveButton.IsEnabled = true;
-            else
-                MergeObjFolderSaveButton.IsEnabled = false;
-        }
-
-        private void MergeObjFolderBrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            string folderName = GuiHelper.OpenFolderDialog();
-            if (folderName != null)
-            {
-                MergeObjFolderBrowseBox.Text = folderName;
-            }
-        }
-
-        private void MergeObjFolderBrowseBox_PreviewDrop(object sender, DragEventArgs e)
-        {
-            string filePath = DragDropGetPath(e, DragDropMode.Folder);
-            if (filePath != null)
-            {
-                MergeObjFolderBrowseBox.Text = filePath;
-            }
-        }
-
-        private Dictionary<string, string> MergeObjFolderDictionary(string objDirectory, string objOutput)
-        {
-            var dict = new Dictionary<string, string>
-            {
-                { "ObjDir", objDirectory },
-                { "ObjOutput", objOutput },
-            };
-            return dict;
-        }
-
-        private void MergeObjFolderSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            string objFolder = MergeObjFolderBrowseBox.Text;
-            if (objFolder != string.Empty)
-            {
-                if (Directory.Exists(objFolder))
-                {
-                    ActionN64 action = ActionN64.MergeObjFiles;
-                    string objFileName = GuiHelper.SaveFileDialog(action, objFolder);
-                    if (objFileName != null)
-                    {
-                        bool success = Start.Tool(action, MergeObjFolderDictionary(objFolder, objFileName), 0);
-                        MessagesHandler.DisplayMessageSuccessFailed(success);
-                    }
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.DirectoryNotExists);
-                    WrlBrowseBox.Focus();
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                WrlBrowseBox.Focus();
-            }
-        }
-
-
-        // Specific Obj files
-
-        /// <summary>
-        /// Add all files in the list to ObjFileList
-        /// </summary>
-        /// <param name="files"></param>
-        private void ObjFilesAppend(ICollection<string> files)
-        {
-            foreach (string str in files)
-            {
-                if (FileHelper.IsFileExtension(str, GuiHelper.ExtensionObj)) 
-                    ObjFileList.Add(str);
-            }
-        }
-
-        /// <summary>
-        /// Update ObjFileList with the list of given files
-        /// </summary>
-        /// <param name="files"></param>
-        private void ObjFilesUpdate(string[] files)
-        {
-            if (files != null)
-            {
-                List<string> tmpNoDuplicate = new List<string>(ObjFileList);
-                tmpNoDuplicate.AddRange(files);
-                ObjFileList.Clear();
-                ObjFilesAppend(new HashSet<string>(tmpNoDuplicate));
-                MergeObjSpecUpdateGUI();
-            }
-        }
-
-        private Dictionary<string, string> MergeObjSpecDictionary(string objOutput)
-        {
-            var dict = new Dictionary<string, string>
-            {
-                { "ObjOutput", objOutput },
-            };
-            return dict;
-        }
-
-
-        private void MergeObjSpecUpdateGUI()
-        {
-            if(ObjFileList.Count > 1)
-            {
-                MergeObjSpecSaveButton.IsEnabled = true;
-            }
-            else
-            {
-                MergeObjSpecSaveButton.IsEnabled = false;
-            }
-        }
-        
-        private void MergeObjSpecBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (MergeObjSpecBox.SelectedItems.Count > 0) // Atleast 1 obj selected
-            {
-                MergeObjSpecDeleteButton.IsEnabled = true;
-            }
-            else
-            {
-                MergeObjSpecDeleteButton.IsEnabled = false;
-            }
-        }
-
-        /// <summary>
-        /// Add the obj files from the selected folder to ObjFileList
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MergeObjSpecAddButton_Click(object sender, RoutedEventArgs e)
-        {
-            ObjFilesUpdate(GuiHelper.OpenFilesDialog(FileFilters.Obj));
-        }
-
-        /// <summary>
-        /// Add the drag and dropped obj files to ObjFileList
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MergeObjSpecBox_Drop(object sender, DragEventArgs e)
-        {
-            ObjFilesUpdate(DragDropGetPaths(e));
-        }
-        
-        private void MergeObjSpecDeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (MergeObjSpecBox.SelectedItems.Count > 0) // Atleast 1 obj selected
-            {
-                List<string> tempObjList = new List<string>();
-                foreach (var objFile in MergeObjSpecBox.SelectedItems)
-                {
-                    if (objFile.GetType().Equals(typeof(string)))
-                        tempObjList.Add((string)objFile);
-                }
-                foreach (string objFile in tempObjList)
-                {
-                    ObjFileList.Remove(objFile);
-                }
-                MergeObjSpecUpdateGUI();
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning("No obj selected");
-            }
-        }
-
-        private void MergeObjSpecSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (ObjFileList.Count > 1) // If there is less than two, no point doing a merge
-            {
-                string directoryOutput = FileHelper.GetDirectoryName(ObjFileList[0]);
-
-                ActionN64 action = ActionN64.MergeSpecObjFiles;
-                string objFileName = GuiHelper.SaveFileDialog(action, directoryOutput);
-                if (objFileName != null)
-                {
-                    Start.objFileList.Clear();
-                    Start.objFileList.AddRange(ObjFileList);
-                    bool success = Start.Tool(action, MergeObjSpecDictionary(objFileName), 0);
-                    MessagesHandler.DisplayMessageSuccessFailed(success);
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning("Need atleast 2 obj to merge");
-            }
-        }
-
-        //------------------------------------
-        //------- Events Flip Texture --------
-        //------------------------------------
-
-        private void FlipUpdateGUI()
-        {
-            if (((bool)FlipHorizontallyCheckbox.IsChecked || (bool)FlipVerticallyCheckbox.IsChecked)
-                && FlipBrowseBox.Text != string.Empty)
-            {
-                FlipSaveButton.IsEnabled = true;
-            }
-            else
-            {
-                FlipSaveButton.IsEnabled = false;
-            }
-        }
-
-
-        private Dictionary<string, string> FlipDictionary(string imgFileName, string imgOutputName)
-        {
-            var dict = new Dictionary<string, string>
-            {
-                { "PictureFile", imgFileName },
-                { "PictureOutput", imgOutputName }
-            };
-            return dict;
-        }
-
-        private ObjOptions GetFlipOptions()
-        {
-            ObjOptions options = new ObjOptions();
-
-            // Flip Horizontally
-            if ((bool)FlipHorizontallyCheckbox.IsChecked) options |= ObjOptions.FlipHorizontally;
-
-            // Flip Vertically
-            if ((bool)FlipVerticallyCheckbox.IsChecked) options |= ObjOptions.FlipVertically;
-
-            return options;
-        }
-        
-        private void FlipBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            FlipUpdateGUI();
-        }
-
-        private void FlipBrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            string fileName = GuiHelper.OpenFileDialog(FileFilters.Image);
-            if (fileName != null)
-                FlipBrowseBox.Text = fileName;
-        }
-
-        private void FlipDragDrop_Drop(object sender, DragEventArgs e)
-        {
-            string filePath = DragDropGetPath(e, DragDropMode.Images);
-            if (filePath != null)
-            {
-                FlipBrowseBox.Text = filePath;
-            }
-        }
-
-        private void FlipHorizontallyCheckbox_Changed(object sender, RoutedEventArgs e)
-        {
-            FlipUpdateGUI();
-        }
-
-        private void FlipVerticallyCheckbox_Changed(object sender, RoutedEventArgs e)
-        {
-            FlipUpdateGUI();
-        }
-
-        private void FlipSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            string imgFileName = FlipBrowseBox.Text;
-            if (imgFileName != string.Empty)
-            {
-                if (File.Exists(imgFileName))
-                {
-                    if (FileHelper.IsFileExtension(imgFileName, GuiHelper.ExtensionImages))
-                    {
-                        string directoryOutput = FileHelper.GetDirectoryName(imgFileName);
-
-                        string imgOutputName = GuiHelper.SaveFileDialog(FileHelper.GetFileNameWithoutExtension(imgFileName), GuiHelper.ExtensionPng, FileFilters.Png, directoryOutput);
-                        if (imgOutputName != null)
-                        {
-                            bool success = Start.Tool(ActionN64.FlipPicture, FlipDictionary(imgFileName, imgOutputName), GetFlipOptions());
-                            MessagesHandler.DisplayMessageSuccessFailed(success);
-                        }
-                    }
-                    else
-                    {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtensions, GuiHelper.ExtensionImages);
-                        FlipBrowseBox.Focus();
-                    }
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    FlipBrowseBox.Focus();
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                FlipBrowseBox.Focus();
-            }
-        }
-
-
-        //--------------------------------------
-        //------- Events Mirror Texture --------
-        //--------------------------------------
-
-        private void MirrorUpdateGUI()
-        {
-            if (((bool)MirrorHorizontallyCheckbox.IsChecked || (bool)MirrorVerticallyCheckbox.IsChecked)
-                && MirrorBrowseBox.Text != string.Empty)
-            {
-                MirrorSaveButton.IsEnabled = true;
-            }
-            else
-            {
-                MirrorSaveButton.IsEnabled = false;
-            }
-        }
-
-        private Dictionary<string, string> MirrorDictionary(string imgFileName, string imgOutputName)
-        {
-            var dict = new Dictionary<string, string>
-            {
-                { "PictureFile", imgFileName },
-                { "PictureOutput", imgOutputName }
-            };
-            return dict;
-        }
-
-        private ObjOptions GetMirrorOptions()
-        {
-            ObjOptions options = new ObjOptions();
-
-            // Mirror Horizontally
-            if ((bool)MirrorHorizontallyCheckbox.IsChecked) options |= ObjOptions.MirrorHorizontally;
-
-            // Mirror Vertically
-            if ((bool)MirrorVerticallyCheckbox.IsChecked) options |= ObjOptions.MirrorVertically;
-
-            return options;
-        }
-
-        private void MirrorBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            MirrorUpdateGUI();
-        }
-
-        private void MirrorBrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            string fileName = GuiHelper.OpenFileDialog(FileFilters.Image);
-            if (fileName != null)
-                MirrorBrowseBox.Text = fileName;
-        }
-        
-        private void MirrorDragDrop_Drop(object sender, DragEventArgs e)
-        {
-            string filePath = DragDropGetPath(e, DragDropMode.Images);
-            if (filePath != null)
-            {
-                MirrorBrowseBox.Text = filePath;
-            }
-        }
-
-        private void MirrorHorizontallyCheckbox_Changed(object sender, RoutedEventArgs e)
-        {
-            MirrorUpdateGUI();
-        }
-
-        private void MirrorVerticallyCheckbox_Changed(object sender, RoutedEventArgs e)
-        {
-            MirrorUpdateGUI();
-        }
-        
-        private void MirrorSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            string imgFileName = MirrorBrowseBox.Text;
-            if (imgFileName != string.Empty)
-            {
-                if (File.Exists(imgFileName))
-                {
-                    if (FileHelper.IsFileExtension(imgFileName, GuiHelper.ExtensionImages))
-                    {
-                        string directoryOutput = FileHelper.GetDirectoryName(imgFileName);
-
-                        string imgOutputName = GuiHelper.SaveFileDialog(FileHelper.GetFileNameWithoutExtension(imgFileName), GuiHelper.ExtensionPng, FileFilters.Png, directoryOutput);
-                        if (imgOutputName != null)
-                        {
-                            bool success = Start.Tool(ActionN64.MirrorPicture, MirrorDictionary(imgFileName, imgOutputName), GetMirrorOptions());
-                            MessagesHandler.DisplayMessageSuccessFailed(success);
-                        }
-                    }
-                    else
-                    {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtensions, GuiHelper.ExtensionImages);
-                        MirrorBrowseBox.Focus();
-                    }
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    MirrorBrowseBox.Focus();
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                MirrorBrowseBox.Focus();
-            }
-        }
-        
-        //--------------------------------------
-        //--------- Events Bmp To Png ----------
-        //--------------------------------------
-
-        private void BmpPngUpdateGUI()
-        {
-            if (BmpPngTextureBrowseBox.Text != string.Empty && BmpPngAlphaBrowseBox.Text != string.Empty)
-                BmpPngSaveButton.IsEnabled = true;
-            else
-                BmpPngSaveButton.IsEnabled = false;
-        }
-
-        private Dictionary<string, string> BmpPngDictionary(string imgFileName, string alphaFileName, string imgOutputName)
-        {
-            var dict = new Dictionary<string, string>
-            {
-                { "TextureFile", imgFileName },
-                { "AlphaFile", alphaFileName },
-                { "PictureOutput", imgOutputName }
-            };
-
-            return dict;
-        }
-        
-        private void BmpPngTextureBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            BmpPngUpdateGUI();
-        }
-
-        private void BmpPngTextureBrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            string fileName = GuiHelper.OpenFileDialog(FileFilters.Image);
-            if (fileName != null)
-                BmpPngTextureBrowseBox.Text = fileName;
-        }
-
-        private void BmpPngTextureDragDrop_Drop(object sender, DragEventArgs e)
-        {
-            string filePath = DragDropGetPath(e, DragDropMode.Images);
-            if (filePath != null)
-            {
-                BmpPngTextureBrowseBox.Text = filePath;
-            }
-        }
-
-        private void BmpPngAlphaBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            BmpPngUpdateGUI();
-        }
-
-        private void BmpPngAlphaBrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            string fileName = GuiHelper.OpenFileDialog(FileFilters.Image);
-            if (fileName != null)
-                BmpPngAlphaBrowseBox.Text = fileName;
-        }
-
-        private void BmpPngAlphaDragDrop_Drop(object sender, DragEventArgs e)
-        {
-            string filePath = DragDropGetPath(e, DragDropMode.Images);
-            if (filePath != null)
-            {
-                BmpPngAlphaBrowseBox.Text = filePath;
-            }
-        }
-
-        private void BmpPngSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            string imgFileName = BmpPngTextureBrowseBox.Text;
-            if (imgFileName != string.Empty)
-            {
-                if (File.Exists(imgFileName))
-                {
-                    if (FileHelper.IsFileExtension(imgFileName, GuiHelper.ExtensionImages))
-                    {
-                        string alphaFileName = BmpPngAlphaBrowseBox.Text;
-                        if (alphaFileName != string.Empty)
-                        {
-                            if (File.Exists(alphaFileName))
-                            {
-                                if (FileHelper.IsFileExtension(alphaFileName, GuiHelper.ExtensionImages))
-                                {
-                                    if (ImageHelper.AreSameSize(imgFileName, alphaFileName))
-                                    {
-                                        string directoryOutput = FileHelper.GetDirectoryName(imgFileName);
-
-                                        string imgOutputName = GuiHelper.SaveFileDialog(FileHelper.GetFileNameWithoutExtension(imgFileName), GuiHelper.ExtensionPng, FileFilters.Png, directoryOutput);
-                                        if (imgOutputName != null)
-                                        {
-                                            bool success = Start.Tool(ActionN64.MakeTransparent, BmpPngDictionary(imgFileName, alphaFileName, imgOutputName), 0);
-                                            MessagesHandler.DisplayMessageSuccessFailed(success);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        MessagesHandler.DisplayMessageWarning(MessagesList.DifferentImageSizes);
+                                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageDirectoryNotFound);
+                                        CopyTexturesDirTextureTextBox.Focus();
                                     }
                                 }
                                 else
                                 {
-                                    MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtensions, GuiHelper.ExtensionImages);
-                                    BmpPngAlphaBrowseBox.Focus();
+                                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                                    CopyTexturesDirTextureTextBox.Focus();
                                 }
                             }
-                            else
+                            if (canCopyTextures)
                             {
-                                MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                                BmpPngAlphaBrowseBox.Focus();
+                                bool resultQuestion = MessageBoxUtils.ShowMessageYesNoQuestion(MessageBoxConstants.MessageCopyTextures);
+                                if (resultQuestion)
+                                {
+                                    ActionN64 action = ActionN64.CopyObjTextures;
+                                    ToolResult result = Start.ToolPictures(action, CopyTexturesDictionary(objFilePath, outputDirectoryPath, textureDirectoryPath));
+                                    MessageBoxUtils.ShowMessageExecution(result);
+                                }
                             }
                         }
                         else
                         {
-                            MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                            BmpPngAlphaBrowseBox.Focus();
+                            MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageDirectoryNotFound);
+                            CopyTexturesDirOutputTextBox.Focus();
                         }
                     }
                     else
                     {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtensions, GuiHelper.ExtensionImages);
-                        BmpPngTextureBrowseBox.Focus();
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                        CopyTexturesDirOutputTextBox.Focus();
                     }
                 }
                 else
                 {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    BmpPngTextureBrowseBox.Focus();
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                    CopyTexturesObjFileTextBox.Focus();
                 }
             }
             else
             {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                BmpPngTextureBrowseBox.Focus();
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                CopyTexturesObjFileTextBox.Focus();
             }
         }
 
-
-        //--------------------------------------
-        //--------- Events Other Tools ---------
-        //--------------------------------------
-
-        // Negative
-
-        private void NegativeBrowseBox_TextChanged(object sender, TextChangedEventArgs e)
+        private Dictionary<string, string> CopyTexturesDictionary(string objFilePath, string outputDirectoryPath, string textureDirectoryPath)
         {
-            if (NegativeBrowseBox.Text != string.Empty)
-                NegativeSaveButton.IsEnabled = true;
-            else
-                NegativeSaveButton.IsEnabled = false;
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.ObjFile, objFilePath },
+                { DictConstants.OutputDirectory, outputDirectoryPath },
+                { DictConstants.TextureDir, textureDirectoryPath },
+            };
+
+            return dict;
         }
 
-        private void NegativeBrowseButton_Click(object sender, RoutedEventArgs e)
+        #endregion
+
+        #endregion
+
+        #region Events Flip Texture
+        
+        private void FlipTextureUpdateGUI()
         {
-            string fileName = GuiHelper.OpenFileDialog(FileFilters.Image);
-            if (fileName != null)
-                NegativeBrowseBox.Text = fileName;
+            bool isTextureFileNotEmpty = !String.IsNullOrEmpty(FlipTextureFileTextBox.Text);
+            bool isHorizontalChecked = FlipTextureCkbHorizontally.IsChecked == true;
+            bool isVerticalChecked = FlipTextureCkbVertically.IsChecked == true;
+            bool areBothChecked = isHorizontalChecked && isVerticalChecked;
+            FlipTextureExecuteButton.IsEnabled = isTextureFileNotEmpty && (isHorizontalChecked || isVerticalChecked || areBothChecked);
+        }
+
+        private void FlipTextureFileTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FlipTextureUpdateGUI();
         }
         
-        private void NegativeDragDrop_Drop(object sender, DragEventArgs e)
+        private void FlipTextureFileDrag_Drop(object sender, DragEventArgs e)
         {
             string filePath = DragDropGetPath(e, DragDropMode.Images);
             if (filePath != null)
             {
-                NegativeBrowseBox.Text = filePath;
+                FlipTextureFileTextBox.Text = filePath;
             }
         }
 
-        private Dictionary<string, string> NegativeDictionary(string imgFileName, string imgOutputName)
+        private void FlipTextureFileBrowseButton_Click(object sender, RoutedEventArgs e)
         {
-            var dict = new Dictionary<string, string>
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Images);
+            if (filePath != null)
             {
-                { "PictureFile", imgFileName },
-                { "PictureOutput", imgOutputName }
-            };
-            return dict;
+                FlipTextureFileTextBox.Text = filePath;
+            }
         }
 
-        private void NegativeSaveButton_Click(object sender, RoutedEventArgs e)
+        private void FlipTextureCkbHorizontally_Changed(object sender, RoutedEventArgs e)
         {
-            string imgFileName = NegativeBrowseBox.Text;
-            if (imgFileName != string.Empty)
-            {
-                if (File.Exists(imgFileName))
-                {
-                    if (FileHelper.IsFileExtension(imgFileName, GuiHelper.ExtensionImages))
-                    {
-                        string directoryOutput = FileHelper.GetDirectoryName(imgFileName);
+            FlipTextureUpdateGUI();
+        }
 
-                        string imgOutputName = GuiHelper.SaveFileDialog(FileHelper.GetFileNameWithoutExtension(imgFileName), GuiHelper.ExtensionPng, FileFilters.Png, directoryOutput);
-                        if (imgOutputName != null)
+        private void FlipTextureCkbVertically_Changed(object sender, RoutedEventArgs e)
+        {
+            FlipTextureUpdateGUI();
+        }
+
+        private void FlipTextureExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string pictureFilePath = FlipTextureFileTextBox.Text;
+            if (!String.IsNullOrEmpty(pictureFilePath))
+            {
+                if (System.IO.File.Exists(pictureFilePath))
+                {
+                    if (FileUtils.IsFileExtension(pictureFilePath, FileConstants.ExtensionImages))
+                    {
+                        ActionN64 action = ActionN64.FlipTexture;
+                        string pictureOutputPath = FileUtils.SaveFileDialogPresetFileName(action,
+                            System.IO.Path.GetFileNameWithoutExtension(pictureFilePath),
+                            System.IO.Path.GetDirectoryName(pictureFilePath));
+                        if (!String.IsNullOrEmpty(pictureOutputPath))
                         {
-                            bool success = Start.Tool(ActionN64.NegativePicture, NegativeDictionary(imgFileName, imgOutputName), 0);
-                            MessagesHandler.DisplayMessageSuccessFailed(success);
+                            ToolResult result = Start.ToolPictures(action, FlipTextureGetDataDictionary(pictureFilePath, pictureOutputPath), FlipTextureGetPictureOptions());
+                            MessageBoxUtils.ShowMessageExecution(result);
                         }
                     }
                     else
                     {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.WrongExtensions, GuiHelper.ExtensionImages);
-                        NegativeBrowseBox.Focus();
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotExtension + FileConstants.ExtensionImages);
+                        FlipTextureFileTextBox.Focus();
                     }
                 }
                 else
                 {
-                    MessagesHandler.DisplayMessageWarning(MessagesList.FileNotExists);
-                    NegativeBrowseBox.Focus();
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                    FlipTextureFileTextBox.Focus();
                 }
             }
             else
             {
-                MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                NegativeBrowseBox.Focus();
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                FlipTextureFileTextBox.Focus();
             }
         }
 
-
-        //-------------------------------------
-        //--------- Events BlackList ----------
-        //-------------------------------------
-
-        // Add/Delete Games
-
-        private void BlacklistAddGameBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (BlacklistAddGameBox.Text != string.Empty)
-            {
-                BlacklistAddGameButton.IsEnabled = true;
-            }
-            else
-            {
-                BlacklistAddGameButton.IsEnabled = false;
-            }
-        }
-
-        private void BlacklistAddGameButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (BlacklistAddGameBox.Text != string.Empty)
-            {
-                GameTexturesXml game = new GameTexturesXml
-                {
-                    Name = BlacklistAddGameBox.Text
-                };
-                GamesList.Add(game);
-                BlacklistAddGameBox.Text = string.Empty; // Reset the TextBox 
-                SaveTexturesBlacklistXml();
-            }
-        }
-
-        private void BlacklistDeleteGameSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var selected = BlacklistDeleteGameSelect.SelectedValue;
-            if (selected != null)
-            {
-                BlacklistDeleteGameButton.IsEnabled = true;
-            }
-            else
-            {
-                BlacklistDeleteGameButton.IsEnabled = false;
-            }
-            
-        }
-
-        private void BlacklistDeleteGameButton_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedGame = BlacklistDeleteGameSelect.SelectedValue;
-            if (selectedGame != null)
-            {
-                if (selectedGame.GetType().Equals(typeof(GameTexturesXml))) // Safe check
-                {
-                    GamesList.Remove((GameTexturesXml) selectedGame);
-                    SaveTexturesBlacklistXml();
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageError("Error deleting the game");
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.NoGameSelected);
-            }
-        }
-
-        // Add/Delete Textures
-
-        private void GameTexturesAppend(ICollection<string> list)
-        {
-            foreach (string str in list)
-            {
-                if (FileHelper.IsFileExtension(str, GuiHelper.ExtensionImages))
-                    GameTextures.Add(str);
-            }
-        }
-
-        private void BlacklistTextureFilesUpdate(string[] files)
-        {
-            if (files != null)
-            {
-                List<string> tmpNoDuplicate = new List<string>(GameTextures);
-                tmpNoDuplicate.AddRange(files);
-                GameTextures.Clear();
-                GameTexturesAppend(new HashSet<string>(tmpNoDuplicate));
-                BlacklistTextureSaveButton.IsEnabled = true;
-            }
-        }
-
-        private void BlacklistTextureGameSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            GameTextures.Clear();
-            var selectedGame = BlacklistTextureGameSelect.SelectedValue;
-            if (selectedGame != null)
-            {
-                if (selectedGame.GetType().Equals(typeof(GameTexturesXml))) // Safe check
-                {
-                    GameTexturesAppend(((GameTexturesXml)selectedGame).Textures);
-                    BlacklistTextureAddButton.IsEnabled = true;
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageError(MessagesList.ErrorGameData);
-                }
-            }
-            else
-            {
-                BlacklistTextureAddButton.IsEnabled = false;
-                BlacklistTextureDeleteButton.IsEnabled = false;
-                BlacklistTextureSaveButton.IsEnabled = false;
-            }
-        }
-        
-
-        private void BlacklistTextureBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (BlacklistTextureBox.SelectedItems.Count > 0) // Atleast 1 texture path selected
-            {
-                BlacklistTextureDeleteButton.IsEnabled = true;
-            }
-            else
-            {
-                BlacklistTextureDeleteButton.IsEnabled = false;
-            }
-        }
-
-        private void BlacklistTextureAddButton_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedGame = BlacklistTextureGameSelect.SelectedValue;
-            if (selectedGame != null)
-            {
-                if (selectedGame.GetType().Equals(typeof(GameTexturesXml))) // Safe check
-                {
-                    string[] files = GuiHelper.OpenFilesDialog(FileFilters.Image);
-                    BlacklistTextureFilesUpdate(files);
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageError(MessagesList.ErrorGameData);
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.NoGameSelected);
-            }
-        }
-
-        private void BlacklistTextureBox_Drop(object sender, DragEventArgs e)
-        {
-            var selectedGame = BlacklistTextureGameSelect.SelectedValue;
-            if (selectedGame != null)
-            {
-                if (selectedGame.GetType().Equals(typeof(GameTexturesXml))) // Safe check
-                {
-                    BlacklistTextureFilesUpdate(DragDropGetPaths(e));
-                }
-            }
-        }
-
-        private void BlacklistTextureDeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (BlacklistTextureBox.SelectedItems.Count > 0) // Atleast 1 texture path selected
-            {
-                List<string> tempTextures = new List<string>();
-                foreach (var texture in BlacklistTextureBox.SelectedItems)
-                {
-                    if (texture.GetType().Equals(typeof(string)))
-                        tempTextures.Add((string)texture);
-                }
-                foreach (string texture in tempTextures)
-                {
-                    GameTextures.Remove(texture);
-                }
-                BlacklistTextureSaveButton.IsEnabled = true;
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning("No texture selected");
-            }
-        }
-
-        private void BlacklistTextureSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedGame = BlacklistTextureGameSelect.SelectedValue;
-            if (selectedGame != null)
-            {
-                if (selectedGame.GetType().Equals(typeof(GameTexturesXml))) // Safe check
-                {
-                    ((GameTexturesXml)selectedGame).Textures = new HashSet<string>(GameTextures);
-                    SaveTexturesBlacklistXml();
-                    MessagesHandler.DisplayMessageInformation(string.Format("Updated {0}",TexturesBlacklistXml));
-                    BlacklistTextureSaveButton.IsEnabled = false;
-                }
-                else
-                {
-                    MessagesHandler.DisplayMessageError(MessagesList.ErrorGameData);
-                }
-            }
-            else
-            {
-                MessagesHandler.DisplayMessageWarning(MessagesList.NoGameSelected);
-            }
-        }
-
-        // Copy Textures
-
-        private void BlacklistUpdateGUI()
-        {
-            var selectedGame = BlacklistCopyGameSelect.SelectedValue;
-            if (selectedGame != null && BlacklistCopyTextureOutputBox.Text != string.Empty)
-            {
-                BlacklistCopyTextureButton.IsEnabled = true;
-            }
-            else
-            {
-                BlacklistCopyTextureButton.IsEnabled = false;
-            }
-        }
-        
-        private Dictionary<string, string> BlacklistCopyDictionary(string outputFolder)
+        private Dictionary<string, string> FlipTextureGetDataDictionary(string pictureFilePath, string pictureOutputPath)
         {
             var dict = new Dictionary<string, string>
             {
-                { "OutputFolder", outputFolder }
+                { DictConstants.PictureFile, pictureFilePath },
+                { DictConstants.PictureOutput, pictureOutputPath },
             };
             return dict;
         }
-        
-        private void BlacklistCopyGameSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
+
+        private PictureOptions FlipTextureGetPictureOptions()
         {
-            BlacklistUpdateGUI();
+            PictureOptions options = new PictureOptions();
+            if (FlipTextureCkbHorizontally.IsChecked == true) {options |= PictureOptions.FlipHorizontally; }
+            if (FlipTextureCkbVertically.IsChecked == true) {options |= PictureOptions.FlipVertically; }
+            return options;
         }
 
-        private void BlacklistCopyTextureOutputBox_TextChanged(object sender, TextChangedEventArgs e)
+        #endregion
+
+        #region Events Mirror Texture
+
+        private void MirrorTextureUpdateGUI()
         {
-            BlacklistUpdateGUI();
+            bool isTextureFileNotEmpty = !String.IsNullOrEmpty(MirrorTextureFileTextBox.Text);
+            bool isHorizontalChecked = MirrorTextureCkbHorizontally.IsChecked == true;
+            bool isVerticalChecked = MirrorTextureCkbVertically.IsChecked == true;
+            bool areBothChecked = isHorizontalChecked && isVerticalChecked;
+            MirrorTextureExecuteButton.IsEnabled = isTextureFileNotEmpty && (isHorizontalChecked || isVerticalChecked || areBothChecked);
         }
 
-        private void BlacklistCopyTextureOutputButton_Click(object sender, RoutedEventArgs e)
+        private void MirrorTextureFileTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string folderName = GuiHelper.OpenFolderDialog();
-            if (folderName != null)
-                BlacklistCopyTextureOutputBox.Text = folderName;
+            MirrorTextureUpdateGUI();
         }
 
-
-        private void BlacklistCopyTexture_Drop(object sender, DragEventArgs e)
+        private void MirrorTextureFileDrag_Drop(object sender, DragEventArgs e)
         {
-            string filePath = DragDropGetPath(e, DragDropMode.Folder);
+            string filePath = DragDropGetPath(e, DragDropMode.Images);
             if (filePath != null)
             {
-                BlacklistCopyTextureOutputBox.Text = filePath;
+                MirrorTextureFileTextBox.Text = filePath;
             }
         }
 
-        private void BlacklistCopyTextureButton_Click(object sender, RoutedEventArgs e)
+        private void MirrorTextureFileBrowseButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedGame = BlacklistCopyGameSelect.SelectedValue;
-            if (selectedGame != null)
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Images);
+            if (filePath != null)
             {
-                if (selectedGame.GetType().Equals(typeof(GameTexturesXml))) // Safe check
-                {
-                    string outputFolder = BlacklistCopyTextureOutputBox.Text;
+                MirrorTextureFileTextBox.Text = filePath;
+            }
+        }
 
-                    if (!string.IsNullOrEmpty(outputFolder))
+        private void MirrorTextureCkbHorizontally_Changed(object sender, RoutedEventArgs e)
+        {
+            MirrorTextureUpdateGUI();
+        }
+
+        private void MirrorTextureCkbVertically_Changed(object sender, RoutedEventArgs e)
+        {
+            MirrorTextureUpdateGUI();
+        }
+
+        private void MirrorTextureExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string pictureFilePath = MirrorTextureFileTextBox.Text;
+            if (!String.IsNullOrEmpty(pictureFilePath))
+            {
+                if (System.IO.File.Exists(pictureFilePath))
+                {
+                    if (FileUtils.IsFileExtension(pictureFilePath, FileConstants.ExtensionImages))
                     {
-                        if (Directory.Exists(outputFolder))
+                        ActionN64 action = ActionN64.MirrorTexture;
+                        string pictureOutputPath = FileUtils.SaveFileDialogPresetFileName(action,
+                            System.IO.Path.GetFileNameWithoutExtension(pictureFilePath),
+                            System.IO.Path.GetDirectoryName(pictureFilePath));
+                        if (!String.IsNullOrEmpty(pictureOutputPath))
                         {
-                            Start.texturesList.Clear();
-                            Start.texturesList.AddRange(((GameTexturesXml)selectedGame).Textures);
-                            bool success = Start.Tool(ActionN64.CopyBlacklistTextures, BlacklistCopyDictionary(outputFolder), 0);
-                            MessagesHandler.DisplayMessageSuccessFailed(success);
+                            ToolResult result = Start.ToolPictures(action, MirrorTextureGetDataDictionary(pictureFilePath, pictureOutputPath), MirrorTextureGetPictureOptions());
+                            MessageBoxUtils.ShowMessageExecution(result);
+                        }
+                    }
+                    else
+                    {
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotExtension + FileConstants.ExtensionImages);
+                        MirrorTextureFileTextBox.Focus();
+                    }
+                }
+                else
+                {
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                    MirrorTextureFileTextBox.Focus();
+                }
+            }
+            else
+            {
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                MirrorTextureFileTextBox.Focus();
+            }
+        }
+
+        private Dictionary<string, string> MirrorTextureGetDataDictionary(string pictureFilePath, string pictureOutputPath)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.PictureFile, pictureFilePath },
+                { DictConstants.PictureOutput, pictureOutputPath },
+            };
+            return dict;
+        }
+
+
+        private PictureOptions MirrorTextureGetPictureOptions()
+        {
+            PictureOptions options = new PictureOptions();
+            if (MirrorTextureCkbHorizontally.IsChecked == true) { options |= PictureOptions.MirrorHorizontally; }
+            if (MirrorTextureCkbVertically.IsChecked == true) { options |= PictureOptions.MirrorVertically; }
+            return options;
+        }
+
+        #endregion
+
+        #region Events Texture Transparency
+
+        private void TransparentUpdateGUI()
+        {
+            bool isTextureFileNotEmpty = !String.IsNullOrEmpty(TransparentTextureFileTextBox.Text);
+            bool isAlphaFileNotEmpty = !String.IsNullOrEmpty(TransparentAlphaFileTextBox.Text);
+            TransparentTextureExecuteButton.IsEnabled = isTextureFileNotEmpty && isAlphaFileNotEmpty;
+        }
+
+        private void TransparentTextureFileTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TransparentUpdateGUI();
+        }
+
+        private void TransparentTextureFileDrag_Drop(object sender, DragEventArgs e)
+        {
+            string filePath = DragDropGetPath(e, DragDropMode.Images);
+            if (filePath != null)
+            {
+                TransparentTextureFileTextBox.Text = filePath;
+            }
+        }
+
+        private void TransparentTextureFileBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Images);
+            if (filePath != null)
+            {
+                TransparentTextureFileTextBox.Text = filePath;
+            }
+        }
+
+        private void TransparentAlphaFileTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TransparentUpdateGUI();
+        }
+        
+        private void TransparentAlphaFileDrag_Drop(object sender, DragEventArgs e)
+        {
+            string filePath = DragDropGetPath(e, DragDropMode.Images);
+            if (filePath != null)
+            {
+                TransparentAlphaFileTextBox.Text = filePath;
+            }
+        }
+
+        private void TransparentAlphaFileBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Images);
+            if (filePath != null)
+            {
+                TransparentAlphaFileTextBox.Text = filePath;
+            }
+        }
+
+        private void TransparentTextureExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string textureFilePath = TransparentTextureFileTextBox.Text;
+            if (!String.IsNullOrEmpty(textureFilePath))
+            {
+                if (System.IO.File.Exists(textureFilePath))
+                {
+                    if (FileUtils.IsFileExtension(textureFilePath, FileConstants.ExtensionImages))
+                    {
+                        string alphaFilePath = TransparentAlphaFileTextBox.Text;
+                        if (!String.IsNullOrEmpty(alphaFilePath))
+                        {
+                            if (System.IO.File.Exists(alphaFilePath))
+                            {
+                                if (FileUtils.IsFileExtension(alphaFilePath, FileConstants.ExtensionImages))
+                                {
+                                    ActionN64 action = ActionN64.MakeTransparent;
+                                    string pictureOutputPath = FileUtils.SaveFileDialogPresetFileName(action,
+                                        System.IO.Path.GetFileNameWithoutExtension(textureFilePath),
+                                        System.IO.Path.GetDirectoryName(textureFilePath));
+                                    if (!String.IsNullOrEmpty(pictureOutputPath))
+                                    {
+                                        ToolResult result = Start.ToolPictures(action, TransparentGetDataDictionary(alphaFilePath, textureFilePath, pictureOutputPath));
+                                        MessageBoxUtils.ShowMessageExecution(result);
+                                    }
+                                }
+                                else
+                                {
+                                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotExtension + FileConstants.ExtensionImages);
+                                    TransparentAlphaFileTextBox.Focus();
+                                }
+                            }
+                            else
+                            {
+                                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                                TransparentAlphaFileTextBox.Focus();
+                            }
                         }
                         else
                         {
-                            MessagesHandler.DisplayMessageWarning(MessagesList.DirectoryNotExists);
-                            BlacklistCopyTextureOutputBox.Focus();
+                            MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                            TransparentAlphaFileTextBox.Focus();
                         }
                     }
                     else
                     {
-                        MessagesHandler.DisplayMessageWarning(MessagesList.EmptyText);
-                        BlacklistCopyTextureOutputBox.Focus();
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotExtension + FileConstants.ExtensionImages);
+                        TransparentTextureFileTextBox.Focus();
                     }
                 }
                 else
                 {
-                    MessagesHandler.DisplayMessageError(MessagesList.ErrorGameData);
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                    TransparentTextureFileTextBox.Focus();
                 }
             }
             else
             {
-                MessagesHandler.DisplayMessageWarning(MessagesList.NoGameSelected);
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                TransparentTextureFileTextBox.Focus();
+            }
+        }
+
+        private Dictionary<string, string> TransparentGetDataDictionary(string alphaFilePath, string textureFilePath, string pictureOutputPath)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.AlphaFile, alphaFilePath },
+                { DictConstants.TextureFile, textureFilePath },
+                { DictConstants.PictureOutput, pictureOutputPath },
+            };
+            return dict;
+        }
+
+        #endregion
+
+        #region Events Merge Obj Files
+
+        #region Events Merge Obj Files - Directory
+
+        private void MergeObjDirectoryTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            bool isNotEmpty = !String.IsNullOrEmpty(MergeObjDirectoryTextBox.Text);
+            MergeObjDirectoryExecuteButton.IsEnabled = isNotEmpty;
+        }
+
+        private void MergeObjDirectoryDrag_Drop(object sender, DragEventArgs e)
+        {
+            string directoryPath = DragDropGetPath(e, DragDropMode.Directory);
+            if (directoryPath != null)
+            {
+                MergeObjDirectoryTextBox.Text = directoryPath;
+            }
+        }
+        
+        private void MergeObjDirectoryBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string directoryPath = FileUtils.OpenDirectoryDialog();
+            if (directoryPath != null)
+            {
+                MergeObjDirectoryTextBox.Text = directoryPath;
+            }
+        }
+
+        private void MergeObjDirectoryExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string objDirectoryPath = MergeObjDirectoryTextBox.Text;
+            if (!String.IsNullOrEmpty(objDirectoryPath))
+            {
+                if (System.IO.Directory.Exists(objDirectoryPath))
+                {
+                    ActionN64 action = ActionN64.MergeObjFilesDirectory;
+                    string objOutputPath = FileUtils.SaveFileDialogPreset(action, objDirectoryPath);
+                    if (!String.IsNullOrEmpty(objOutputPath))
+                    {
+                        ToolResult result = Start.ToolObj(action, MergeObjDirectoryGetDataDictionary(objDirectoryPath, objOutputPath));
+                        MessageBoxUtils.ShowMessageExecution(result);
+                    }
+                }
+                else
+                {
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageDirectoryNotFound);
+                    MergeObjDirectoryTextBox.Focus();
+                }
+            }
+            else
+            {
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                MergeObjDirectoryTextBox.Focus();
+            }
+        }
+
+        private Dictionary<string, string> MergeObjDirectoryGetDataDictionary(string objDirectoryPath, string objOutputPath)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.ObjDirectory, objDirectoryPath },
+                { DictConstants.ObjOutput, objOutputPath },
+            };
+            return dict;
+        }
+
+        #endregion
+
+        #region Events Merge Obj Files - List
+        
+        private void MergeObjListUpdateGUI()
+        {
+            // If at least 2 file are loaded, unlock the Merge button
+            MergeObjListExecuteButton.IsEnabled = MergeObjListBox.Items.Count > 1;
+        }
+
+        private void MergeObjListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // If at least 1 file is selected, unlock the Remove button
+            MergeObjListRemoveButton.IsEnabled = MergeObjListBox.SelectedItems.Count > 0;
+        }
+
+        private void MergeObjListDrag_Drop(object sender, DragEventArgs e)
+        {
+            string[] filePathList = DragDropGetPaths(e);
+            MergeObjListAddFiles(filePathList);
+        }
+        
+        private void MergeObjListAddButton_Click(object sender, RoutedEventArgs e)
+        {
+            string[] filePathList = FileUtils.OpenFilesDialog(FileFilters.Obj);
+            MergeObjListAddFiles(filePathList);
+        }
+
+        private void MergeObjListAddFiles(string[] filePathList)
+        {
+            if (filePathList != null)
+            {
+                HashSet<string> objFileList = GetHashsetFromFileList(filePathList, mergeObjFileList);
+                mergeObjFileList.Clear();
+                ToolObjFileListAppend(objFileList);
+                MergeObjListUpdateGUI();
             }
         }
 
 
+        private void ToolObjFileListAppend(ICollection<string> objFileList)
+        {
+            foreach (string objFilePath in objFileList)
+            {
+                if (objFilePath != null)
+                {
+                    if (FileUtils.IsFileExtension(objFilePath, FileConstants.ExtensionObj))
+                    {
+                        mergeObjFileList.Add(objFilePath);
+                    }
+                }
+            }
+        }
+
+        private void MergeObjListRemoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MergeObjListBox.SelectedItems.Count > 0)
+            {
+                HashSet<string> objFileList = new HashSet<string>(MergeObjListGetListOfSelectedObj());
+                for (int i = mergeObjFileList.Count - 1; i >= 0; i--)
+                {
+                    if (objFileList.Contains(mergeObjFileList[i]))
+                    {
+                        mergeObjFileList.RemoveAt(i);
+                    }
+                }
+            }
+            else
+            {
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageObjMergeNone);
+            }
+            MergeObjListUpdateGUI();
+        }
+
+        private List<string> MergeObjListGetListOfSelectedObj()
+        {
+            List<string> objList = new List<string>();
+            foreach (var objFile in MergeObjListBox.SelectedItems)
+            {
+                if (objFile.GetType().Equals(typeof(string)))
+                {
+                    objList.Add((string)objFile);
+                }
+            }
+            return objList;
+        }
+
+
+        private void MergeObjListExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (mergeObjFileList.Count > 1)
+            {
+                ActionN64 action = ActionN64.MergeObjFilesList;
+                string objOutputPath = FileUtils.SaveFileDialogPreset(action, System.IO.Path.GetDirectoryName(mergeObjFileList[0]));
+                if (!String.IsNullOrEmpty(objOutputPath))
+                {
+                    Start.objFileList.Clear();
+                    Start.objFileList.AddRange(mergeObjFileList);
+                    ToolResult result = Start.ToolObj(action, MergeObjListGetDataDictionary(objOutputPath));
+                    MessageBoxUtils.ShowMessageExecution(result);
+                }
+            }
+            else
+            {
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageObjMergeMinimum);
+            }
+        }
+
+        private Dictionary<string, string> MergeObjListGetDataDictionary(string objOutputPath)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.ObjOutput, objOutputPath },
+            };
+            return dict;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Events Negative Picture
+
+        private void NegativePictureTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            bool isNotEmpty = !String.IsNullOrEmpty(NegativePictureTextBox.Text);
+            NegativePictureExecuteButton.IsEnabled = isNotEmpty;
+        }
+
+        private void NegativePictureDrag_Drop(object sender, DragEventArgs e)
+        {
+            string filePath = DragDropGetPath(e, DragDropMode.Images);
+            if (filePath != null)
+            {
+                NegativePictureTextBox.Text = filePath;
+            }
+        }
+
+        private void NegativePictureBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string filePath = FileUtils.OpenFileDialog(FileFilters.Images);
+            if (filePath != null)
+            {
+                NegativePictureTextBox.Text = filePath;
+            }
+        }
+
+        private void NegativePictureExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string pictureFilePath = NegativePictureTextBox.Text;
+            if (!String.IsNullOrEmpty(pictureFilePath))
+            {
+                if (System.IO.File.Exists(pictureFilePath))
+                {
+                    if (FileUtils.IsFileExtension(pictureFilePath, FileConstants.ExtensionImages))
+                    {
+                        ActionN64 action = ActionN64.NegativePicture;
+                        string pictureOutputPath = FileUtils.SaveFileDialogPresetFileName(action, 
+                            System.IO.Path.GetFileNameWithoutExtension(pictureFilePath), 
+                            System.IO.Path.GetDirectoryName(pictureFilePath));
+                        if (!String.IsNullOrEmpty(pictureOutputPath))
+                        {
+                            ToolResult result = Start.ToolPictures(action, NegativePictureGetDataDictionary(pictureFilePath, pictureOutputPath));
+                            MessageBoxUtils.ShowMessageExecution(result);
+                        }
+                    }
+                    else
+                    {
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotExtension + FileConstants.ExtensionImages);
+                        NegativePictureTextBox.Focus();
+                    }
+                }
+                else
+                {
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFileNotFound);
+                    NegativePictureTextBox.Focus();
+                }
+            }
+            else
+            {
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                NegativePictureTextBox.Focus();
+            }
+        }
+
+
+        private Dictionary<string, string> NegativePictureGetDataDictionary(string pictureFilePath, string pictureOutputPath)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.PictureFile, pictureFilePath },
+                { DictConstants.PictureOutput, pictureOutputPath },
+            };
+            return dict;
+        }
+
+        #endregion
+
+        #region Events Settings
+
+        #region Events Settings - BlackList Generic 
+
+        private void BlackListConfigShortcutButton_Click(object sender, RoutedEventArgs e)
+        {
+            TabSettings.IsSelected = true;
+            TabSettingsBlackListConfigs.IsSelected = true;
+        }
+
+        private void BlackListSaveConfig()
+        {
+            bool isSuccess = toolSettings.SaveSettings();
+            MessageBoxUtils.ShowMessageSettings(isSuccess);
+        }
+
+        #endregion
+
+        #region Events Settings - BlackList Config
+
+        private void BlackListConfigComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            BlackListConfigName.DataContext = BlackListConfigComboBox.SelectedItem;
+        }
+
+        private void BlackListConfigAddButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool wasEmpty = toolSettings.BlackList.Count == 0;
+            BlackListConfig config = BlackListConfig.GetNewConfig();
+            toolSettings.BlackList.Add(config);
+            BlackListConfigComboBox.SelectedItem = config;
+            if (wasEmpty)
+            {
+                // If there was no config before adding one, we force the selection on every ComboBox
+                ConfigSetSelected(config);
+            }
+            ConfigListUpdateGUI();
+        }
+
+        private void BlackListConfigDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = BlackListConfigComboBox.SelectedItem;
+            if (selected != null)
+            {
+                var config = (BlackListConfig)selected;
+                toolSettings.BlackList.Remove(config);
+                ConfigForceSelect();
+            }
+            ConfigListUpdateGUI();
+        }
+
+        private void BlackListConfigSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            BlackListSaveConfig();
+        }
+
+        #endregion
+
+        #region Events Settings - BlackList Textures
+
+        private void BlackListTexturesUpdateGUI()
+        {
+            bool isConfigSelected = BlackListTexturesComboBox.SelectedItem != null;
+            BlackListTexturesAddButton.IsEnabled = isConfigSelected;
+        }
+
+        /// <summary>
+        /// Clear the list of texture of the Blacklist ListBox and insert into it all values from a given list
+        /// </summary>
+        /// <param name="texturesList"></param>
+        private void BlackListTexturesFillTexturesList(ICollection<string> texturesList)
+        {
+            blackListTexturesList.Clear();
+            foreach (string pictureFilePath in texturesList)
+            {
+                blackListTexturesList.Add(pictureFilePath);
+            }
+        }
+
+        private void BlackListTexturesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selected = BlackListTexturesComboBox.SelectedItem;
+            if (selected != null)
+            {
+                var config = (BlackListConfig)selected;
+                BlackListTexturesFillTexturesList(config.Textures);
+            }
+            else
+            {
+                // Nothing selected, clear the list
+                blackListTexturesList.Clear();
+            }
+            BlackListTexturesUpdateGUI();
+        }
+
+        private void BlackListTexturesDrag_Drop(object sender, DragEventArgs e)
+        {
+            if (BlackListTexturesComboBox.SelectedItem != null)
+            {
+                string[] filePathList = DragDropGetPaths(e);
+                BlackListTexturesAddFiles(filePathList);
+            }
+        }
+
+        private void BlackListTexturesAddButton_Click(object sender, RoutedEventArgs e)
+        {
+            string[] filePathList = FileUtils.OpenFilesDialog(FileFilters.Images);
+            BlackListTexturesAddFiles(filePathList);
+        }
+
+        private void BlackListTexturesAddFiles(string[] filePathList)
+        {
+            if (filePathList != null)
+            {
+                var selected = BlackListTexturesComboBox.SelectedItem;
+                if (selected != null)
+                {
+                    var config = (BlackListConfig)selected;
+                    HashSet<string> pictureFileList = GetHashsetFromFileList(filePathList, config.Textures);
+
+                    config.Textures.Clear();
+                    BlackListTexturesImagesAppend(config.Textures, pictureFileList);
+                    BlackListTexturesFillTexturesList(config.Textures);
+                    MergeObjListUpdateGUI();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Insert all image files from textureList2 into textureList1 
+        /// </summary>
+        /// <param name="textureList1"></param>
+        /// <param name="textureList2"></param>
+        private void BlackListTexturesImagesAppend(ICollection<string> textureList1, ICollection<string> textureList2)
+        {
+            foreach (string pictureFilePath in textureList2)
+            {
+                if (pictureFilePath != null)
+                {
+                    if (FileUtils.IsFileExtension(pictureFilePath, FileConstants.ExtensionImages))
+                    {
+                        textureList1.Add(pictureFilePath);
+                    }
+                }
+            }
+        }
+
+        private void BlackListTexturesRemoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (BlackListTexturesBox.SelectedItems.Count > 0)
+            {
+                var selected = BlackListTexturesComboBox.SelectedItem;
+                if (selected != null)
+                {
+                    var config = (BlackListConfig)selected;
+                    HashSet<string> pictureFileList = new HashSet<string>(BlackListTexturesGetListOfSelectedTextures());
+                    for (int i = config.Textures.Count - 1; i >= 0; i--)
+                    {
+                        if (pictureFileList.Contains(config.Textures[i]))
+                        {
+                            config.Textures.RemoveAt(i);
+                        }
+                    }
+                    BlackListTexturesFillTexturesList(config.Textures);
+                }
+            }
+            else
+            {
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageBlackListBoxNoSelection);
+            }
+        }
+
+        private List<string> BlackListTexturesGetListOfSelectedTextures()
+        {
+            List<string> textureList = new List<string>();
+            foreach (var textureFile in BlackListTexturesBox.SelectedItems)
+            {
+                if (textureFile.GetType().Equals(typeof(string)))
+                {
+                    textureList.Add((string)textureFile);
+                }
+            }
+            return textureList;
+        }
+
+        private void BlackListTexturesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // If at least 1 file is selected, unlock the Remove button
+            BlackListTexturesRemoveButton.IsEnabled = BlackListTexturesBox.SelectedItems.Count > 0;
+        }
+
+        private void BlackListTexturesSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            BlackListSaveConfig();
+        }
+
+        #endregion
+
+        #region Events Settings - BlackList Copy Textures
+
+        private void BlackListCopyUpdateGUI()
+        {
+            bool isConfigSelected = BlackListCopyComboBox.SelectedItem != null;
+            bool isDirectoryNotEmpty = !String.IsNullOrEmpty(BlackListCopyDirOutputTextBox.Text);
+            BlackListCopyExecuteButton.IsEnabled = isConfigSelected && isDirectoryNotEmpty;
+        }
+        
+        private void BlackListCopyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            BlackListCopyUpdateGUI();
+        }
+
+        private void BlackListCopyDirOutputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            BlackListCopyUpdateGUI();
+        }
+
+        private void BlackListCopyDrag_Drop(object sender, DragEventArgs e)
+        {
+            string directoryPath = DragDropGetPath(e, DragDropMode.Directory);
+            if (directoryPath != null)
+            {
+                BlackListCopyDirOutputTextBox.Text = directoryPath;
+            }
+        }
+
+        private void BlackListCopyBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            string directoryPath = FileUtils.OpenDirectoryDialog();
+            if (directoryPath != null)
+            {
+                BlackListCopyDirOutputTextBox.Text = directoryPath;
+            }
+        }
+
+        private void BlackListCopyExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string outputDirectoryPath = BlackListCopyDirOutputTextBox.Text;
+            if (!String.IsNullOrEmpty(outputDirectoryPath))
+            {
+                if (System.IO.Directory.Exists(outputDirectoryPath))
+                {
+                    var selected = BlackListCopyComboBox.SelectedItem;
+                    if (selected != null)
+                    {
+                        bool resultQuestion = MessageBoxUtils.ShowMessageYesNoQuestion(MessageBoxConstants.MessageBlackListCopyTextures);
+                        if (resultQuestion)
+                        {
+                            var config = (BlackListConfig)selected;
+                            Start.texturesList.Clear();
+                            Start.texturesList.AddRange(config.Textures);
+                            ActionN64 action = ActionN64.CopyBlacklistTextures;
+                            ToolResult result = Start.ToolPictures(action, BlackListCopyGetDataDictionary(outputDirectoryPath));
+                            MessageBoxUtils.ShowMessageExecution(result);
+                        }
+                    }
+                    else
+                    {
+                        MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageBlackListConfigError);
+                    }
+                    
+                }
+                else
+                {
+                    MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageDirectoryNotFound);
+                    BlackListCopyDirOutputTextBox.Focus();
+                }
+            }
+            else
+            {
+                MessageBoxUtils.ShowMessageWarning(MessageBoxConstants.MessageFieldEmpty);
+                BlackListCopyDirOutputTextBox.Focus();
+            }
+        }
+
+        private Dictionary<string, string> BlackListCopyGetDataDictionary(string outputDirectoryPath)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { DictConstants.OutputDirectory, outputDirectoryPath }
+            };
+            return dict;
+        }
+
+        #endregion
+
+        #endregion
 
     }
 
     public enum DragDropMode
     {
+        Any,
         Wrl,
         Obj,
         Images,
-        Folder
+        Directory
     }
 
-    public enum MessagesList
-    {
-        EmptyText,
-        FileNotExists,
-        DirectoryNotExists,
-        WrongExtension,
-        WrongExtensions,
-        DifferentImageSizes,
-        NoGameSelected,
-        ErrorGameData
-    }
-
-
-    public class MessagesHandler
+    public static class MessageBoxUtils
     {
 
-        private const string MessageBoxTitle = "N64 Mapping Tool";
-
-
-        private static string GetMessage(MessagesList msg)
+        public static bool ShowMessageYesNoQuestion(string message)
         {
-            return GetMessage(msg, string.Empty);
+            MessageBoxResult result = MessageBox.Show(message, MessageBoxConstants.MessageTitle, MessageBoxButton.YesNo, MessageBoxImage.Question);
+            return result == MessageBoxResult.Yes;
         }
-        private static string GetMessage(MessagesList msg, string[] str)
+
+        public static void ShowMessageInformation(string message)
         {
-            return GetMessage(msg, string.Join(", ",str));
+            MessageBox.Show(message, MessageBoxConstants.MessageTitle, MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        private static string GetMessage(MessagesList msg, string str)
+
+        public static void ShowMessageWarning(string message)
         {
-            switch (msg)
+            MessageBox.Show(message, MessageBoxConstants.MessageTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        public static void ShowMessageError(string message)
+        {
+            MessageBox.Show(message, MessageBoxConstants.MessageTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        public static void ShowMessageExecution(ToolResult result)
+        {
+            if (result.Success)
             {
-                case MessagesList.EmptyText:
-                    return "The field is empty";
-                case MessagesList.FileNotExists:
-                    return "The file doesn't exist";
-                case MessagesList.DirectoryNotExists:
-                    return "The directory doesn't exist";
-                case MessagesList.WrongExtension:
-                    return string.Format("The file doesn't have the {0} extension", str);
-                case MessagesList.WrongExtensions:
-                    return string.Format("The file doesn't have one of the following extension: {0}", str);
-                case MessagesList.DifferentImageSizes:
-                    return "The textures are not the same size";
-                case MessagesList.NoGameSelected:
-                    return "No game selected";
-                case MessagesList.ErrorGameData:
-                    return "Error getting the game data";
-                default:
-                    return "";
+                if (result.Warn)
+                {
+                    ShowMessageWarning(result.Message);
+                }
+                else
+                {
+                    ShowMessageInformation(result.Message);
+                }
+            }
+            else
+            {
+                ShowMessageError(result.Message);
             }
         }
 
-        public static bool AskYesNoQuestion(string message)
-        {
-            return ResultMessageYesNoQuestion(DisplayYesNoQuestion(message));
-        }
-
-        public static bool ResultMessageYesNoQuestion(MessageBoxResult result)
-        {
-            if (result == MessageBoxResult.Yes)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static MessageBoxResult DisplayYesNoQuestion(string message)
-        {
-            MessageBoxResult result = MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.YesNo, MessageBoxImage.Question);
-            return result;
-        }
-
-        public static void DisplayMessageWarning(MessagesList msg)
-        {
-            DisplayMessageWarning(GetMessage(msg));
-        }
-        public static void DisplayMessageWarning(MessagesList msg, string[] str)
-        {
-            DisplayMessageWarning(GetMessage(msg, str));
-        }
-        public static void DisplayMessageWarning(MessagesList msg, string str)
-        {
-            DisplayMessageWarning(GetMessage(msg, str));
-        }
-
-        public static void DisplayMessageWarning(string message)
-        {
-            MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-
-        public static void DisplayMessageInformation(string message)
-        {
-            MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        public static void DisplayMessageError(MessagesList msg)
-        {
-            DisplayMessageError(GetMessage(msg));
-        }
-        public static void DisplayMessageError(string message)
-        {
-            MessageBox.Show(message, MessageBoxTitle, MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
-        public static void DisplayMessageSuccessFailed(bool success)
+        public static void ShowMessageSettings(bool success)
         {
             if (success)
-                DisplayMessageSuccess();
+                ShowMessageInformation(MessageBoxConstants.MessageSaveSettingsOK);
             else
-                DisplayMessageFailed();
-        }
-        private static void DisplayMessageSuccess()
-        {
-            DisplayMessageInformation("Success");
-        }
-        private static void DisplayMessageFailed()
-        {
-            DisplayMessageError("Error during the execution");
+                ShowMessageError(MessageBoxConstants.MessageSaveSettingsFailure);
         }
 
-        
     }
 
 }

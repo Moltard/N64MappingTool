@@ -3,25 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using N64Library.Tool.Data;
 using N64Library.Tool.Utils;
 
-namespace N64Library.Tool.WrlFiles
+namespace N64Library.Tool.Parser
 {
 
-    public class WrlParser
+    public static class WrlParser
     {
+
+        /// <summary>
+        /// Try to parse the wrl file to make the data useable. Return null if error during the parsing
+        /// </summary>
+        /// <param name="file">File to parse</param>
+        /// <returns>WrlData if successful, null otherwise</returns>
+        public static WrlData TryParseWrl(string file)
+        {
+            WrlData wrlData = null;
+            try { wrlData = ParseWrl(file); } catch { }
+            return wrlData;
+        }
+
         /// <summary>
         /// Parse the wrl file to make the data useable
         /// </summary>
-        /// <param name="file"></param>
+        /// <param name="file">File to parse</param>
         /// <returns></returns>
         public static WrlData ParseWrl(string file)
         {
-            string[] lines = Helper.RemoveBlankSpaces(Helper.ReadFile(file)); // Read the file and remove blankspace
+            string[] lines = GenericUtils.RemoveBlankSpaces(FileUtilsShared.ReadFile(file)); // Read the file and remove blankspace
 
             if (lines != null)
             {
-                WrlData wrl = new WrlData();
+                WrlData wrlData = new WrlData();
                 
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -29,12 +43,12 @@ namespace N64Library.Tool.WrlFiles
                     {
                         int transformStart = i;
                         int transformEnd = GetIndexEnd(lines, transformStart);
-    
-                        wrl.TransformsList.Add(TransformData(lines, transformStart, transformEnd)); 
+                        if (transformEnd == -1) { return null; } // Parsing error
+                        wrlData.TransformsList.Add(TransformData(lines, transformStart, transformEnd));
                         i = transformEnd; // We go to the end of transform
                     }
                 }
-                return wrl;
+                return wrlData;
             }
             return null;
         }
@@ -47,6 +61,7 @@ namespace N64Library.Tool.WrlFiles
                 {
                     int childrenStart = i;
                     int childrenEnd = GetIndexEnd(lines, childrenStart);
+                    if (childrenEnd == -1) { break; } // Parsing error
                     return new Transform(ChildrenData(lines, childrenStart, childrenEnd));
                 }
             }
@@ -62,6 +77,7 @@ namespace N64Library.Tool.WrlFiles
                 {
                     int shapeStart = i;
                     int shapeEnd = GetIndexEnd(lines, shapeStart);
+                    if (shapeEnd == -1) { break; } // Parsing error
                     shapesList.Add(ShapeData(lines, shapeStart, shapeEnd));
                     i = shapeEnd;
                 }
@@ -78,6 +94,7 @@ namespace N64Library.Tool.WrlFiles
                 {
                     int appearanceStart = i;
                     int appearanceEnd = GetIndexEnd(lines, appearanceStart);
+                    if (appearanceEnd == -1) { break; } // Parsing error
                     shape.Appearance = AppearenceData(lines, appearanceStart, appearanceEnd);
                     i = appearanceEnd;
                 }
@@ -86,6 +103,7 @@ namespace N64Library.Tool.WrlFiles
                 {
                     int geometryStart = i;
                     int geometryEnd = GetIndexEnd(lines, geometryStart);
+                    if (geometryEnd == -1) { break; } // Parsing error
                     shape.Geometry = GeometryData(lines, geometryStart, geometryEnd);
                     i = geometryEnd;
                 }
@@ -102,12 +120,14 @@ namespace N64Library.Tool.WrlFiles
                 if (lines[i].StartsWith("material Material"))
                 {
                     int endIndexM = GetIndexEnd(lines, i);
+                    if (endIndexM == -1) { break; } // Parsing error
                     appearence.Material = MaterialData(lines, i, endIndexM);
                     i = endIndexM; // We go to the } closing material
                 }
                 else if (lines[i].StartsWith("texture ImageTexture"))
                 {
                     int endIndexT = GetIndexEnd(lines, i);
+                    if (endIndexT == -1) { break; } // Parsing error
                     appearence.Texture = ImageTextureData(lines, i, endIndexT);
                     i = endIndexT; // We go to the } closing texture
                 }
@@ -118,25 +138,30 @@ namespace N64Library.Tool.WrlFiles
         private static Material MaterialData(string[] lines, int startIndex, int endIndex)
         {
             Material material = new Material();
-            double? temp = null;
             for (int i = startIndex + 1; i < endIndex; i++)
             {
-                string[] lineSplit = Helper.SplitKeyValue(lines[i]);
+                string[] lineSplit = GenericUtils.SplitKeyValue(lines[i]);
                 string k = lineSplit[0]; string v = lineSplit[1];
                 
                 switch (k)
                 {
                     case "ambientIntensity":
-                        if ((temp = Helper.StringToDouble(v)) != null)
-                            material.AmbientIntensity = (double)temp;
+                        if (Double.TryParse(v, out double tmpDouble))
+                        {
+                            material.AmbientIntensity = tmpDouble;
+                        }
                         break;
                     case "shininess":
-                        if ((temp = Helper.StringToDouble(v)) != null)
-                            material.Shininess = (double)temp;
+                        if (Double.TryParse(v, out tmpDouble))
+                        {
+                            material.Shininess = tmpDouble;
+                        }
                         break;
                     case "transparency":
-                        if ((temp = Helper.StringToDouble(v)) != null)
-                            material.Transparency = (double)temp;
+                        if (Double.TryParse(v, out tmpDouble))
+                        {
+                            material.Transparency = tmpDouble;
+                        }
                         break;
                     case "diffuseColor":
                         material.DiffuseColor = new Color(v);
@@ -160,7 +185,7 @@ namespace N64Library.Tool.WrlFiles
             ImageTexture imageTexture = new ImageTexture();
             for (int i = startIndex + 1; i < endIndex; i++)
             {
-                string[] lineSplit = Helper.SplitKeyValue(lines[i]);
+                string[] lineSplit = GenericUtils.SplitKeyValue(lines[i]);
                 string k = lineSplit[0]; string v = lineSplit[1];
                 switch (k)
                 {
@@ -171,7 +196,7 @@ namespace N64Library.Tool.WrlFiles
                         imageTexture.RepeatT = v;
                         break;
                     case "url":
-                        imageTexture.Url = Helper.SplitQuoteValue(v); // url "3DCCECBB_c.bmp"
+                        imageTexture.Url = GenericUtils.SplitQuoteValue(v); // url "3DCCECBB_c.bmp"
                         break;
                     default:
                         break;
@@ -189,11 +214,11 @@ namespace N64Library.Tool.WrlFiles
             {
                 if (lines[i].StartsWith("ccw")) // ccw FALSE
                 {
-                    geometry.Ccw = Helper.GetValueFromSplit(lines[i]);
+                    geometry.Ccw = GenericUtils.GetValueFromSplit(lines[i]);
                 }
                 else if (lines[i].StartsWith("solid")) // solid TRUE
                 {
-                    geometry.Solid = Helper.GetValueFromSplit(lines[i]);
+                    geometry.Solid = GenericUtils.GetValueFromSplit(lines[i]);
                 }
                 else if (lines[i].StartsWith("coord Coordinate"))
                 {
@@ -235,8 +260,8 @@ namespace N64Library.Tool.WrlFiles
                 endIndex = GetIndexEnd(lines, startIndex);
                 for (int i = startIndex + 1; i < endIndex; i++) // We start on the line after point
                 {
-                    // -0.13476259 0.11304023 0.42341546,
-                    Point p = new Point(Helper.SplitBySpace(Helper.TrimEndComma(lines[i])));
+                    // e.g. -0.13476259 0.11304023 0.42341546,
+                    Point p = new Point(GenericUtils.SplitBySpace(GenericUtils.TrimEndComma(lines[i])));
                     coordinates.PointsList.Add(p);
                 }
             }
@@ -255,7 +280,7 @@ namespace N64Library.Tool.WrlFiles
                 endIndex = GetIndexEnd(lines, startIndex);
                 for (int i = startIndex + 1; i < endIndex; i++) // We start on the line after point
                 {
-                    UVCoordinates uv = new UVCoordinates(Helper.SplitBySpace(Helper.TrimEndComma(lines[i])));
+                    UVCoordinates uv = new UVCoordinates(GenericUtils.SplitBySpace(GenericUtils.TrimEndComma(lines[i])));
                     textureCoordinates.UVList.Add(uv);
                 }
             }
@@ -267,7 +292,9 @@ namespace N64Library.Tool.WrlFiles
         {
             CoordIndexesWrl coordIndexes = new CoordIndexesWrl();
             for (int i = startIndex + 1; i < endIndex; i++)
+            {
                 coordIndexes.IndexesList.Add(new CoordIndexWrl(lines[i]));
+            }
             return coordIndexes;
         }
 
@@ -299,6 +326,10 @@ namespace N64Library.Tool.WrlFiles
                 {
                     indexEnd = i; // We get the current index
                     break; // We leave the current loop
+                }
+                if (i == -1) // Error in the parsing of the file which returned never changed indexEnd and returned -1
+                {
+                    return -1; // By returning -1, we cancel the other loops
                 }
                 if (i_bracket == 0 && i_curlyBracket == 0) // We are in the original loop
                 {

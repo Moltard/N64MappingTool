@@ -62,8 +62,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Tool\Settings.cs" />
     <Compile Include="Tool\Start.cs" />
-    <Compile Include="Tool\Utils\GuiHelpers.cs" />
+    <Compile Include="Tool\ToolResult.cs" />
+    <Compile Include="Tool\Utils\Constants.cs" />
+    <Compile Include="Tool\Utils\FileUtils.cs" />
+    <Compile Include="Tool\Utils\XmlUtils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -118,10 +122,6 @@
     <Resource Include="Images\Base_32_BW.png" />
     <Resource Include="Images\Base_32_BW_Negative.png" />
     <Resource Include="Images\Base_32_Negative.png" />
-    <Content Include="TexturesBlacklist.xml">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

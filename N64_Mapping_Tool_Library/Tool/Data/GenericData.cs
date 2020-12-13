@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace N64Library.Tool.Utils
+namespace N64Library.Tool.Data
 {
     /// <summary>
     /// Class used to store a int reference (Java Integer behaviour)
@@ -203,30 +203,10 @@ namespace N64Library.Tool.Utils
         /// <summary>
         /// Return the norm of the vector (positive value)
         /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static double GetNorm(Vector v)
-        {
-            return v.GetNorm();
-        }
-
-        /// <summary>
-        /// Return the norm of the vector (positive value)
-        /// </summary>
         /// <returns></returns>
         public double GetNorm()
         {
             return Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2));
-        }
-
-        /// <summary>
-        /// Calculate the Unit vector
-        /// </summary>
-        /// <param name="vector"></param>
-        /// <returns></returns>
-        public static Vector GetUnitVector(Vector vector)
-        {
-            return vector.GetUnitVector();
         }
 
         /// <summary>
@@ -331,8 +311,8 @@ namespace N64Library.Tool.Utils
             // 1    0       0
             // 0    cos a   - sin a
             // 0    sin a   cos a
-            double cos = AngleHelper.Cos(a);
-            double sin = AngleHelper.Sin(a);
+            double cos = AngleUtils.Cos(a);
+            double sin = AngleUtils.Sin(a);
 
             Coordinates3D Row1 = new Coordinates3D(1, 0, 0);
             Coordinates3D Row2 = new Coordinates3D(0, cos, -sin);
@@ -350,8 +330,8 @@ namespace N64Library.Tool.Utils
             // cos a    0       sin a
             // 0        1       0
             // -sin a   0       cos a
-            double cos = AngleHelper.Cos(a);
-            double sin = AngleHelper.Sin(a);
+            double cos = AngleUtils.Cos(a);
+            double sin = AngleUtils.Sin(a);
 
             Coordinates3D Row1 = new Coordinates3D(cos, 0, sin);
             Coordinates3D Row2 = new Coordinates3D(0, 1, 0);
@@ -369,8 +349,8 @@ namespace N64Library.Tool.Utils
             // cos a    - sin a     0    
             // sin a    cos a       0        
             // 0        0           1
-            double cos = AngleHelper.Cos(a);
-            double sin = AngleHelper.Sin(a);
+            double cos = AngleUtils.Cos(a);
+            double sin = AngleUtils.Sin(a);
 
             Coordinates3D Row1 = new Coordinates3D(cos, -sin, 0);
             Coordinates3D Row2 = new Coordinates3D(sin, cos, 0);

@@ -1,4 +1,5 @@
-﻿using N64Library.Tool.Utils;
+﻿using N64Library.Tool.Data;
+using N64Library.Tool.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace N64Library.Tool.ObjFiles
+namespace N64Library.Tool.Exporter
 {
-    public class MtlExporter
+    public static class MtlExporter
     {
         /// <summary>
         /// Create the mtl file with the given data
@@ -22,54 +23,53 @@ namespace N64Library.Tool.ObjFiles
             {
                 using (StreamWriter mtl = new StreamWriter(mtlFilename))
                 {
-                    mtl.WriteLine(ObjHelper.GetCreditsFile());
+                    mtl.WriteLine(GenericUtils.GetCreditsFile());
 
                     // newmtl, Ns, Ka, Kd, Ks, Ni, d, illum, map_Kd, map_Ka, map_Ks, map_d
                     foreach (MaterialMtl material in mtlData.MaterialsList)
                     {
-                        mtl.WriteLine(MtlHelper.GetNewNewMtl(material.NewMtl));
-                        mtl.WriteLine(MtlHelper.GetNewNs(material.Ns));
+                        mtl.WriteLine(MtlUtils.GetNewNewMtl(material.NewMtl));
+                        mtl.WriteLine(MtlUtils.GetNewNs(material.Ns));
 
                         if (material.Ka != null)
-                            mtl.WriteLine(MtlHelper.GetNewKa(material.Ka.ToString()));
+                            mtl.WriteLine(MtlUtils.GetNewKa(material.Ka.ToString()));
                         else
-                            mtl.WriteLine(MtlHelper.GetNewKa());
+                            mtl.WriteLine(MtlUtils.GetNewKa());
 
                         if (material.Kd != null)
-                            mtl.WriteLine(MtlHelper.GetNewKd(material.Kd.ToString()));
+                            mtl.WriteLine(MtlUtils.GetNewKd(material.Kd.ToString()));
                         else
-                            mtl.WriteLine(MtlHelper.GetNewKd());
+                            mtl.WriteLine(MtlUtils.GetNewKd());
 
                         if (material.Ks != null)
-                            mtl.WriteLine(MtlHelper.GetNewKs(material.Ks.ToString()));
+                            mtl.WriteLine(MtlUtils.GetNewKs(material.Ks.ToString()));
                         else
-                            mtl.WriteLine(MtlHelper.GetNewKs());
+                            mtl.WriteLine(MtlUtils.GetNewKs());
 
                         if (material.Ke != null)
-                            mtl.WriteLine(MtlHelper.GetNewKe(material.Ke.ToString()));
+                            mtl.WriteLine(MtlUtils.GetNewKe(material.Ke.ToString()));
                         else
-                            mtl.WriteLine(MtlHelper.GetNewKe());
+                            mtl.WriteLine(MtlUtils.GetNewKe());
 
-                        mtl.WriteLine(MtlHelper.GetNewNi(material.Ni));
-                        mtl.WriteLine(MtlHelper.GetNewD(material.D)); 
-                        mtl.WriteLine(MtlHelper.GetNewIllum(material.Illum)); 
+                        mtl.WriteLine(MtlUtils.GetNewNi(material.Ni));
+                        mtl.WriteLine(MtlUtils.GetNewD(material.D)); 
+                        mtl.WriteLine(MtlUtils.GetNewIllum(material.Illum)); 
 
                         if (material.MapKd != null)
-                            mtl.WriteLine(MtlHelper.GetNewMapKd(material.MapKd));
+                            mtl.WriteLine(MtlUtils.GetNewMapKd(material.MapKd));
                         if (material.MapKa != null)
-                            mtl.WriteLine(MtlHelper.GetNewMapKa(material.MapKa));
+                            mtl.WriteLine(MtlUtils.GetNewMapKa(material.MapKa));
                         if (material.MapKs != null)
-                            mtl.WriteLine(MtlHelper.GetNewMapKs(material.MapKs));
+                            mtl.WriteLine(MtlUtils.GetNewMapKs(material.MapKs));
                         if (material.MapD != null)
-                            mtl.WriteLine(MtlHelper.GetNewMapD(material.MapD));
+                            mtl.WriteLine(MtlUtils.GetNewMapD(material.MapD));
 
                         mtl.WriteLine(); // Empty line
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
                 return false;
             }
             return true;
@@ -87,14 +87,13 @@ namespace N64Library.Tool.ObjFiles
             {
                 using (StreamWriter mtl = new StreamWriter(mtlFilename)) // Make the .mtl file
                 {
-                    mtl.WriteLine(ObjHelper.GetCreditsFile());
+                    mtl.WriteLine(GenericUtils.GetCreditsFile());
                     foreach (string line in mtlLines)
                         mtl.WriteLine(line); // Add the data to the mtl file
                 }
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
                 return false;
             }
             return true;

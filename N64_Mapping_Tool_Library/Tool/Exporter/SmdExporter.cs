@@ -1,4 +1,5 @@
-﻿using N64Library.Tool.ObjFiles;
+﻿using N64Library.Tool.Data;
+using N64Library.Tool.Modifier;
 using N64Library.Tool.Utils;
 using System;
 using System.Collections.Generic;
@@ -7,14 +8,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace N64Library.Tool.SmdFiles
+namespace N64Library.Tool.Exporter
 {
-    public class SmdExporter
+    public static class SmdExporter
     {
 
-        private const string defaultMaterial = "default.bmp";
-        private const string defaultCoord = "0.000000 0.000000 0.000000";
-        private const string defaultUV = "0.000000 0.000000";
+        private const string DefaultMaterial = "default.bmp";
+        private const string DefaultCoord = "0.000000 0.000000 0.000000";
+        private const string DefaultUV = "0.000000 0.000000";
 
         /// <summary>
         /// Create the smd file with the given data
@@ -34,21 +35,21 @@ namespace N64Library.Tool.SmdFiles
                 using (StreamWriter smd = new StreamWriter(smdFilename))
                 {
                     // version 1
-                    smd.WriteLine(SmdHelper.GetNewHeader());
+                    smd.WriteLine(SmdUtils.GetNewHeader());
 
                     // nodes
-                    smd.WriteLine(SmdHelper.GetNewNodes());
-                    smd.WriteLine(SmdHelper.GetNewBone());
-                    smd.WriteLine(SmdHelper.GetNewEnd());
+                    smd.WriteLine(SmdUtils.GetNewNodes());
+                    smd.WriteLine(SmdUtils.GetNewBone());
+                    smd.WriteLine(SmdUtils.GetNewEnd());
 
                     // skeleton
-                    smd.WriteLine(SmdHelper.GetNewSkeleton());
-                    smd.WriteLine(SmdHelper.GetNewTime());
-                    smd.WriteLine(SmdHelper.GetNewPosition());
-                    smd.WriteLine(SmdHelper.GetNewEnd());
+                    smd.WriteLine(SmdUtils.GetNewSkeleton());
+                    smd.WriteLine(SmdUtils.GetNewTime());
+                    smd.WriteLine(SmdUtils.GetNewPosition());
+                    smd.WriteLine(SmdUtils.GetNewEnd());
 
                     // triangles
-                    smd.WriteLine(SmdHelper.GetNewTriangles());
+                    smd.WriteLine(SmdUtils.GetNewTriangles());
                     foreach (ObjectObj objectObj in objData.ObjectsList)
                     {
                         string smdMaterial = GetSmdMaterial(objectObj.MaterialName, objectObj.TextureName, useTextureName);
@@ -62,9 +63,9 @@ namespace N64Library.Tool.SmdFiles
                             smd.WriteLine(smdMaterial);
                             foreach (VertIndexObj vertIndex in vertIndexes.VertIndexList)
                             {
-                                string coordStr = defaultCoord;
-                                string uvStr = defaultUV;
-                                string normalStr = defaultCoord;
+                                string coordStr = DefaultCoord;
+                                string uvStr = DefaultUV;
+                                string normalStr = DefaultCoord;
 
 
                                 if (vertIndex.V != null)
@@ -93,11 +94,11 @@ namespace N64Library.Tool.SmdFiles
                                     }
                                 }
                                        
-                                smd.WriteLine(SmdHelper.GetNewTriangle(0, coordStr, normalStr, uvStr));
+                                smd.WriteLine(SmdUtils.GetNewTriangle(0, coordStr, normalStr, uvStr));
                             }
                         }
                     }
-                    smd.WriteLine(SmdHelper.GetNewEnd());
+                    smd.WriteLine(SmdUtils.GetNewEnd());
                 }
             }
             catch
@@ -134,7 +135,7 @@ namespace N64Library.Tool.SmdFiles
             }
             if (smdMaterial == null)
             {
-                return defaultMaterial;
+                return DefaultMaterial;
             }
             return smdMaterial;
         }

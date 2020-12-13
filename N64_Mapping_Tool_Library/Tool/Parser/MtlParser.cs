@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using N64Library.Tool.Data;
 using N64Library.Tool.Utils;
 
-namespace N64Library.Tool.ObjFiles
+namespace N64Library.Tool.Parser
 {
-    public class MtlParser
+    public static class MtlParser
     {
         /// <summary>
         /// Parse the mtl used by the given obj
@@ -25,8 +26,8 @@ namespace N64Library.Tool.ObjFiles
                     string mtlFile = mtlLib;
                     if (!System.IO.Path.IsPathRooted(mtlFile)) // Not an absolute path to the mtl file
                     {
-                        string directory = FileHelper.GetDirectoryName(filePath); // Directory of the obj
-                        mtlFile = FileHelper.Combine(directory, mtlFile); // The mtl directory is based on the obj's
+                        string directory = System.IO.Path.GetDirectoryName(filePath); // Directory of the obj
+                        mtlFile = System.IO.Path.Combine(directory, mtlFile); // The mtl directory is based on the obj's
                     }
                     return ParseMtl(mtlFile);
                 }
@@ -41,7 +42,7 @@ namespace N64Library.Tool.ObjFiles
         /// <returns></returns>
         public static MtlData ParseMtl(string file)
         {
-            string[] lines = Helper.RemoveBlankSpaces(Helper.ReadFile(file)); // Read the file and remove blankspaces
+            string[] lines = GenericUtils.RemoveBlankSpaces(FileUtilsShared.ReadFile(file)); // Read the file and remove blankspaces
             if (lines != null)
             {
                 // Store all the other data to parse
@@ -58,7 +59,7 @@ namespace N64Library.Tool.ObjFiles
                     Tuple<string, string> keyValue = listKeysValues[i];
                     if (keyValue != null) // Never null unless error or final line
                     {
-                        if (MtlHelper.IsNewMtl(keyValue.Item1))
+                        if (MtlUtils.IsNewMtl(keyValue.Item1))
                         {
                             int materialStart = i;
                             int materialEnd = GetIndexEnd(listKeysValues, length, materialStart);
@@ -89,10 +90,7 @@ namespace N64Library.Tool.ObjFiles
                 {
                     string key = keyValue.Item1;
                     string value = keyValue.Item2.TrimEnd('\0').Trim(); // Remove the null character and any blank space
-
-                    double? tmpDouble = null;
-                    int? tmpInt = null;
-
+                    
                     switch (key)
                     {
                         case "newmtl":
@@ -111,24 +109,28 @@ namespace N64Library.Tool.ObjFiles
                             materialMtl.Ke = new Color(value);
                             break;
                         case "Ns":
-                            tmpDouble = Helper.StringToDouble(value);
-                            if (tmpDouble != null)
-                                materialMtl.Ns = (double)tmpDouble;
+                            if (Double.TryParse(value, out double tmpDouble))
+                            {
+                                materialMtl.Ns = tmpDouble;
+                            }
                             break;
                         case "Ni":
-                            tmpDouble = Helper.StringToDouble(value);
-                            if (tmpDouble != null)
-                                materialMtl.Ni = (double)tmpDouble;
+                            if (Double.TryParse(value, out tmpDouble))
+                            {
+                                materialMtl.Ni = tmpDouble;
+                            }
                             break;
                         case "d":
-                            tmpDouble = Helper.StringToDouble(value);
-                            if (tmpDouble != null)
-                                materialMtl.D = (double)tmpDouble;
+                            if (Double.TryParse(value, out tmpDouble))
+                            {
+                                materialMtl.D = tmpDouble;
+                            }
                             break;
                         case "illum":
-                            tmpInt = Helper.StringToInt(value);
-                            if (tmpInt != null)
-                                materialMtl.Illum = (int)tmpInt;
+                            if (Int32.TryParse(value, out int tmpInt))
+                            {
+                                materialMtl.Illum = tmpInt;
+                            }
                             break;
                         case "map_Kd":
                             materialMtl.MapKd = value;
@@ -162,7 +164,7 @@ namespace N64Library.Tool.ObjFiles
                 Tuple<string, string> keyValue = listKeysValues[i];
                 if (keyValue == null) // The only null KeyValue is the last one
                     return i;
-                if (MtlHelper.IsNewMtl(keyValue.Item1))
+                if (MtlUtils.IsNewMtl(keyValue.Item1))
                     return i;
                 i++;
             }
@@ -178,7 +180,7 @@ namespace N64Library.Tool.ObjFiles
                 string line = lines[i];
                 if (!string.IsNullOrEmpty(line)) // If not empty line nor null
                 {
-                    Tuple<string, string> keyValue = Helper.GetKeyValueFromSplit(line.Trim());
+                    Tuple<string, string> keyValue = GenericUtils.GetKeyValueFromSplit(line.Trim());
                     if (keyValue != null)
                     {
                         listKeysValues.Add(keyValue);

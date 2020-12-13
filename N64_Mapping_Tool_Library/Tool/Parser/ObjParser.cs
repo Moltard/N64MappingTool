@@ -1,13 +1,14 @@
-﻿using N64Library.Tool.Utils;
+﻿using N64Library.Tool.Data;
+using N64Library.Tool.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace N64Library.Tool.ObjFiles
+namespace N64Library.Tool.Parser
 {
-    public class ObjParser
+    public static class ObjParser
     {
         private delegate bool IsObjectGroup(string line);
         private static IsObjectGroup isObjectGroup;
@@ -23,12 +24,25 @@ namespace N64Library.Tool.ObjFiles
             List<ObjData> objDatas = new List<ObjData>();
             foreach(string file in fileList)
             {
-                ObjData objData = ParseObj(file, parseMtl);
+                ObjData objData = TryParseObj(file, parseMtl);
                 if (objData != null)
                     objDatas.Add(objData);
             }
 
             return objDatas;
+        }
+
+        /// <summary>
+        /// Try to parse the obj file to make the data useable. Return null if error during the parsing
+        /// </summary>
+        /// <param name="file">File to parse</param>
+        /// <param name="parseMtl">Parse the mtl file directly</param>
+        /// <returns>WrlData if successful, null otherwise</returns>
+        public static ObjData TryParseObj(string file, bool parseMtl = true)
+        {
+            ObjData objData = null;
+            try { objData = ParseObj(file, parseMtl); } catch { }
+            return objData;
         }
 
         /// <summary>
@@ -39,7 +53,7 @@ namespace N64Library.Tool.ObjFiles
         /// <returns></returns>
         public static ObjData ParseObj(string file, bool parseMtl = true)
         {
-            string[] lines = Helper.RemoveBlankSpaces(Helper.ReadFile(file)); // Read the file and remove blankspaces
+            string[] lines = GenericUtils.RemoveBlankSpaces(FileUtilsShared.ReadFile(file)); // Read the file and remove blankspaces
             if (lines != null)
             {
                 UpdateParseLineGroup(lines);
@@ -104,7 +118,7 @@ namespace N64Library.Tool.ObjFiles
                 {
                     string key = keyValue.Item1;
                     string value = keyValue.Item2.TrimEnd('\0').Trim(); // Remove the null character and any blank space
-                    if (ObjHelper.IsVertData(key)) // f
+                    if (ObjUtils.IsVertData(key)) // f
                     {
                         VerticeData(value, objectObj, allVertices, indexesObj);
                     }
@@ -124,9 +138,10 @@ namespace N64Library.Tool.ObjFiles
                             case "s":
                                 if (value != "off")
                                 {
-                                    int? s = Helper.StringToInt(value);
-                                    if (s != null)
-                                        objectObj.Smooth = (int)s;
+                                    if (Int32.TryParse(value, out int s))
+                                    {
+                                        objectObj.Smooth = s;
+                                    }
                                 }
                                 break;
                             default:
@@ -150,11 +165,11 @@ namespace N64Library.Tool.ObjFiles
         {
             VertIndexesObj vertIndexes = new VertIndexesObj();
 
-            foreach (string indexes in ObjHelper.SplitVertData(value))
+            foreach (string indexes in ObjUtils.SplitVertData(value))
             {
                 VertIndexObj vertIndex = new VertIndexObj();
 
-                string[] indexList = ObjHelper.SplitIndexes(indexes);
+                string[] indexList = ObjUtils.SplitIndexes(indexes);
 
                 int length = indexList.Length;
 
@@ -163,9 +178,10 @@ namespace N64Library.Tool.ObjFiles
                     int index = 0;
                     if (indexList[i] != "") // the vt line can be empty
                     {
-                        int? tmpIndex = Helper.StringToInt(indexList[i]); // Get the index
-                        if (tmpIndex != null)
-                            index = (int)tmpIndex;
+                        if (Int32.TryParse(indexList[i], out int tmpIndex)) // Get the index
+                        {
+                            index = tmpIndex;
+                        }
                     }
                     
                     if (i == 0) // v
@@ -249,17 +265,17 @@ namespace N64Library.Tool.ObjFiles
             {
                 if (lines[i].StartsWith("o ")) // We find the line of the first object "o"
                 { 
-                    isObjectGroup = ObjHelper.IsObject;
+                    isObjectGroup = ObjUtils.IsObject;
                     break;
                 }
                 else if (lines[i].StartsWith("g ")) // If there is no "o", we find the first "g"
                 {
-                    isObjectGroup = ObjHelper.IsGroup;
+                    isObjectGroup = ObjUtils.IsGroup;
                     break;
                 }
                 else if (lines[i].StartsWith("usemtl ")) // A material could also be on top of everything
                 {
-                    isObjectGroup = ObjHelper.IsMaterial;
+                    isObjectGroup = ObjUtils.IsMaterial;
                     break;
                 }
             }
@@ -280,7 +296,7 @@ namespace N64Library.Tool.ObjFiles
                 string line = lines[i];
                 if (!string.IsNullOrEmpty(line)) // If not empty line nor null
                 {
-                    Tuple<string, string> keyValue = Helper.GetKeyValueFromSplit(line.Trim());
+                    Tuple<string, string> keyValue = GenericUtils.GetKeyValueFromSplit(line.Trim());
                     if (keyValue != null)
                     {
                         string key = keyValue.Item1;

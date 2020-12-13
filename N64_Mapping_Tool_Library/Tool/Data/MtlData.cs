@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace N64Library.Tool.ObjFiles
+namespace N64Library.Tool.Data
 {
     public class MtlData
     {

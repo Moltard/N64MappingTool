@@ -1,12 +1,13 @@
-﻿using System;
+﻿using N64Library.Tool.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace N64Library.Tool.WrlFiles
+namespace N64Library.Tool.Modifier
 {
-    public class WrlModifier
+    public static class WrlModifier
     {
         /// <summary>
         /// Reverse the vertex order of the model

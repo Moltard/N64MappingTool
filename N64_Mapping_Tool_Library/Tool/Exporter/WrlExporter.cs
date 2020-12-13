@@ -4,11 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using N64Library.Tool.Data;
 using N64Library.Tool.Utils;
 
-namespace N64Library.Tool.WrlFiles
+namespace N64Library.Tool.Exporter
 {
-    public class WrlExporter
+    public static class WrlExporter
     {
         /// <summary>
         /// Create the obj and mtl files with the given data
@@ -19,10 +20,10 @@ namespace N64Library.Tool.WrlFiles
         public static bool WriteObj(WrlData wrlData, string objFilename)
         {
             // objFilename has the .obj extension
-            string directory = FileHelper.GetDirectoryName(objFilename);
-            string noExtension = FileHelper.GetFileNameWithoutExtension(objFilename);
-            string mtlRelative = string.Format("{0}.mtl", noExtension);
-            string mtlFilename = FileHelper.Combine(directory, mtlRelative);
+            string directory = System.IO.Path.GetDirectoryName(objFilename);
+            string noExtension = System.IO.Path.GetFileNameWithoutExtension(objFilename);
+            string mtlRelative = $"{noExtension}.mtl";
+            string mtlFilename = System.IO.Path.Combine(directory, mtlRelative);
 
             List<string> mtlLines = new List<string>(); // To store the lines to append to the mtl file
 
@@ -32,8 +33,8 @@ namespace N64Library.Tool.WrlFiles
                 {
                     // mtllib, o, v, vt, g, usemtl, s, f
 
-                    obj.WriteLine(ObjHelper.GetCreditsFile());
-                    obj.WriteLine(ObjHelper.GetMtlLib(mtlRelative));
+                    obj.WriteLine(GenericUtils.GetCreditsFile());
+                    obj.WriteLine(ObjUtils.GetNewMtlLib(mtlRelative));
 
                     int i_coordIndex = 0;
                     int i_texCoordIndex = 0;
@@ -58,17 +59,17 @@ namespace N64Library.Tool.WrlFiles
                                 {
                                     urlTexture = shape.Appearance.Texture.Url;
                                     if (urlTexture != null)
-                                        groupName = ObjHelper.GetGroupName(index, urlTexture);
+                                        groupName = ObjUtils.GetGroupName(index, urlTexture);
                                     else
-                                        groupName = ObjHelper.GetGroupName(index);
+                                        groupName = ObjUtils.GetGroupName(index);
                                 }
                                 else
-                                    groupName = ObjHelper.GetGroupName(index);
+                                    groupName = ObjUtils.GetGroupName(index);
                             }
 
-                            mtlLines.Add(MtlHelper.GetMtlData(groupName, urlTexture, diffuseColor));
+                            mtlLines.Add(MtlUtils.GetMtlData(groupName, urlTexture, diffuseColor));
 
-                            obj.WriteLine(ObjHelper.GetNewObject(groupName)); // o
+                            obj.WriteLine(ObjUtils.GetNewObject(groupName)); // o
 
 
                             int sizeCoord = 0; int sizeTexCoord = 0;
@@ -79,20 +80,20 @@ namespace N64Library.Tool.WrlFiles
                                 {
                                     sizeCoord = shape.Geometry.Coord.PointsList.Count;
                                     foreach (Point point in shape.Geometry.Coord.PointsList)
-                                        obj.WriteLine(ObjHelper.GetNewCoord(point.ToString())); // v
+                                        obj.WriteLine(ObjUtils.GetNewCoord(point.ToString())); // v
                                 }
 
                                 if (shape.Geometry.TexCoord != null)
                                 {
                                     sizeTexCoord = shape.Geometry.TexCoord.UVList.Count;
                                     foreach (UVCoordinates uv in shape.Geometry.TexCoord.UVList)
-                                        obj.WriteLine(ObjHelper.GetNewTexCoord(uv.ToString())); // vt
+                                        obj.WriteLine(ObjUtils.GetNewTexCoord(uv.ToString())); // vt
                                 }
                             }
 
-                            obj.WriteLine(ObjHelper.GetNewGroup(groupName)); // g
-                            obj.WriteLine(ObjHelper.GetNewUseMtl(groupName)); // usemtl
-                            obj.WriteLine(ObjHelper.GetNewSmoothGroup()); // s
+                            obj.WriteLine(ObjUtils.GetNewGroup(groupName)); // g
+                            obj.WriteLine(ObjUtils.GetNewUseMtl(groupName)); // usemtl
+                            obj.WriteLine(ObjUtils.GetNewSmoothGroup()); // s
 
                             if (shape.Geometry != null)
                             {
@@ -108,7 +109,7 @@ namespace N64Library.Tool.WrlFiles
                                         for (int i = 0; i < coordIndexesList.Count; i++)
                                         {
                                             string strIndexesF = GetIndexesF(coordIndexesList[i], texCoordIndexesList[i], i_coordIndex, i_texCoordIndex);
-                                            obj.WriteLine(ObjHelper.GetNewF(strIndexesF)); // f
+                                            obj.WriteLine(ObjUtils.GetNewF(strIndexesF)); // f
                                         }
                                     }
                                     else
@@ -116,7 +117,7 @@ namespace N64Library.Tool.WrlFiles
                                         foreach (CoordIndexWrl coordIndex in coordIndexesList)
                                         {
                                             string strIndexesF = GetIndexesF(coordIndex, i_coordIndex);
-                                            obj.WriteLine(ObjHelper.GetNewF(strIndexesF)); // f
+                                            obj.WriteLine(ObjUtils.GetNewF(strIndexesF)); // f
                                         }
                                     }
                                 }
@@ -129,12 +130,11 @@ namespace N64Library.Tool.WrlFiles
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
                 return false;
             }
-            return ObjFiles.MtlExporter.WriteMtl(mtlLines, mtlFilename); // Create the mtl file
+            return MtlExporter.WriteMtl(mtlLines, mtlFilename); // Create the mtl file
         }
 
 

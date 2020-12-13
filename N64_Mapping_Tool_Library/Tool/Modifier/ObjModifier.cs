@@ -1,13 +1,14 @@
-﻿using N64Library.Tool.Utils;
+﻿using N64Library.Tool.Data;
+using N64Library.Tool.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace N64Library.Tool.ObjFiles
+namespace N64Library.Tool.Modifier
 {
-    public class ObjModifier
+    public static class ObjModifier
     {
         /// <summary>
         /// Iterate through the mtl to update every texture associated to each material in the obj
@@ -18,11 +19,11 @@ namespace N64Library.Tool.ObjFiles
         {
             if (mtlData != null)
             {
-                Dictionary<string, string> dictMaterialTexture = MtlHelper.GetDictMaterialTexture(mtlData);
+                Dictionary<string, string> dictMaterialTexture = MtlUtils.GetDictMaterialTexture(mtlData);
                 foreach (ObjectObj objectObj in objData.ObjectsList)
                 {
                     if (objectObj.MaterialName != null)
-                        objectObj.TextureName = MtlHelper.GetTextureFromMaterial(dictMaterialTexture, objectObj.MaterialName);
+                        objectObj.TextureName = MtlUtils.GetTextureFromMaterial(dictMaterialTexture, objectObj.MaterialName);
                 }
             }
         }
@@ -113,10 +114,10 @@ namespace N64Library.Tool.ObjFiles
                 return false;
 
             // Dictionary that associate every material to a list of groups
-            Dictionary<string, List<int>> dictMaterialGroups = ObjHelper.GetDictMaterialGroups(objData);
+            Dictionary<string, List<int>> dictMaterialGroups = ObjUtils.GetDictMaterialGroups(objData);
 
             // Dictionary that associate every material of the mtl file to their index
-            Dictionary<string, int> dictMaterialIndex = MtlHelper.GetDictMaterialIndex(mtlData);
+            Dictionary<string, int> dictMaterialIndex = MtlUtils.GetDictMaterialIndex(mtlData);
             
             List<MaterialMtl> newMaterialsList = new List<MaterialMtl>();
 
@@ -153,9 +154,9 @@ namespace N64Library.Tool.ObjFiles
 
                 if (objectObj.TextureName == null) // No texture assigned currently
                 {
-                    string textureName = Helper.ExtractTextureNameFromMaterial(objectObj.MaterialName);
+                    string textureName = GenericUtils.ExtractTextureNameFromMaterial(objectObj.MaterialName);
                     if (textureName == null) // No bmp found in the material
-                        textureName = Helper.ExtractTextureNameFromMaterial(objectObj.GroupName);
+                        textureName = GenericUtils.ExtractTextureNameFromMaterial(objectObj.GroupName);
                     objectObj.TextureName = textureName;
                 }
             }
@@ -215,9 +216,9 @@ namespace N64Library.Tool.ObjFiles
         /// <param name="aZ">Rotation angle on the Z axis</param>
         public static void RotateModel(ObjData objData, double aX, double aY, double aZ)
         {
-            Matrix3D matrixX = Matrix3D.GetXRotationMatrix(AngleHelper.DegreeToRadian(aX));
-            Matrix3D matrixY = Matrix3D.GetXRotationMatrix(AngleHelper.DegreeToRadian(aY));
-            Matrix3D matrixZ = Matrix3D.GetXRotationMatrix(AngleHelper.DegreeToRadian(aZ));
+            Matrix3D matrixX = Matrix3D.GetXRotationMatrix(AngleUtils.DegreeToRadian(aX));
+            Matrix3D matrixY = Matrix3D.GetXRotationMatrix(AngleUtils.DegreeToRadian(aY));
+            Matrix3D matrixZ = Matrix3D.GetXRotationMatrix(AngleUtils.DegreeToRadian(aZ));
 
             foreach (ObjectObj objectObj in objData.ObjectsList)
             {
@@ -260,7 +261,7 @@ namespace N64Library.Tool.ObjFiles
                 return false;
 
             foreach (MaterialMtl materialMtl in mtlData.MaterialsList)
-                if (materialMtl.NewMtl == null) // if a mtlData is null, sorting would throw an exception
+                if (materialMtl.NewMtl == null) // if a NewMtl is null, sorting would throw an exception
                     return false;
 
             mtlData.MaterialsList.Sort((p, q) => p.NewMtl.CompareTo((q.NewMtl)));
@@ -277,7 +278,7 @@ namespace N64Library.Tool.ObjFiles
             if (mtlData == null)
                 return false;
 
-            var tupleTextureMaterials = MtlHelper.GetTupleDictTextureMaterials(mtlData);
+            var tupleTextureMaterials = MtlUtils.GetTupleDictTextureMaterials(mtlData);
 
             // Dictionary that associate every texture to a list of materials
             Dictionary<string, List<int>> dictTextureMaterials = tupleTextureMaterials.Item1;
@@ -286,10 +287,10 @@ namespace N64Library.Tool.ObjFiles
             List<int> untexturedMaterials = tupleTextureMaterials.Item2;
 
             // Dictionary that associate every material to a list of groups
-            Dictionary<string, List<int>> dictMaterialGroups = ObjHelper.GetDictMaterialGroups(objData);
+            Dictionary<string, List<int>> dictMaterialGroups = ObjUtils.GetDictMaterialGroups(objData);
 
             // Dictionary that associate every texture to a list of groups
-            Dictionary<string, List<int>> dictTextureGroups = ObjHelper.GetDictTextureGroups(objData, mtlData,
+            Dictionary<string, List<int>> dictTextureGroups = ObjUtils.GetDictTextureGroups(objData, mtlData,
                 dictTextureMaterials, dictMaterialGroups);
             
             List<ObjectObj> newObjectsList = new List<ObjectObj>();
@@ -346,7 +347,7 @@ namespace N64Library.Tool.ObjFiles
             if (length >= 1) // Should always be the case
             {
                 // If the texture name is a relative/absolute path to the file, we only keep the name
-                string relativeTexture = FileHelper.GetFileName(textureName);
+                string relativeTexture = System.IO.Path.GetFileName(textureName);
 
                 ObjectObj objectObj = new ObjectObj(objData.ObjectsList[groups[0]])
                 {
@@ -413,7 +414,7 @@ namespace N64Library.Tool.ObjFiles
         {
             if (materials.Count >= 1) // Should always be the case
             {
-                string relativeTexture = FileHelper.GetFileName(textureName);
+                string relativeTexture = System.IO.Path.GetFileName(textureName);
 
                 MaterialMtl materialMtl = new MaterialMtl(mtlData.MaterialsList[materials[0]])
                 {
@@ -433,52 +434,81 @@ namespace N64Library.Tool.ObjFiles
         /// <returns>True if successful</returns>
         public static bool CopyUsedTextures(MtlData mtlData, string outputFolder, string srcDir)
         {
-            if (mtlData == null) // No Mtl to read texture data
+            if (mtlData == null) 
+                // No Mtl to read texture data
                 return false;
 
             bool relative = false;
             if (srcDir == null)
             {
+                // If a textureDirectory was not specified, the textures are found relative to the mtl file
+                srcDir = System.IO.Path.GetDirectoryName(mtlData.FilePath);
                 relative = true;
-                srcDir = FileHelper.GetDirectoryName(mtlData.FilePath);
             }
 
-            if (!System.IO.Directory.Exists(srcDir)) // The source directory doesn't exist
+            if (!System.IO.Directory.Exists(srcDir)) 
+                // The source directory doesn't exist
                 return false;
 
             if (!System.IO.Directory.Exists(outputFolder))
-                if (!FileHelper.CreateDirectory(outputFolder)) // Impossible to create the destination directory
+            {
+                if (!FileUtilsShared.TryCreateDirectory(outputFolder)) 
+                    // Impossible to create the destination directory
                     return false;
+            }
             
-            HashSet<string> texturesList = MtlHelper.GetListTextures(mtlData);
+            HashSet<string> texturesList = MtlUtils.GetListTextures(mtlData);
             foreach (string texture in texturesList)
             {
                 string srcFile;
-                string destFile = FileHelper.Combine(outputFolder, FileHelper.GetFileName(texture));
+                string destFile = System.IO.Path.Combine(outputFolder, System.IO.Path.GetFileName(texture));
 
                 if (relative) // The path to the texture is inside the material
                 {
-                    if (FileHelper.IsPathRooted(texture)) // Absolute path to the picture
+                    if (System.IO.Path.IsPathRooted(texture)) // Absolute path to the picture
                         srcFile = texture;   
                     else // Relative to the mtl
-                        srcFile = FileHelper.Combine(srcDir, texture);
+                        srcFile = System.IO.Path.Combine(srcDir, texture);
                 }
                 else // We find the texture in a given folder
                 {
-                    srcFile = FileHelper.Combine(srcDir, FileHelper.GetFileName(texture));
+                    srcFile = System.IO.Path.Combine(srcDir, System.IO.Path.GetFileName(texture));
                 }
 
-                if (System.IO.File.Exists(srcFile))
+                if (!destFile.Equals(srcFile)) // Destination file is not the Source file
                 {
-                    if (System.IO.File.Exists(destFile)) // The destination file already exists, we need to delete it
+                    if (System.IO.File.Exists(srcFile))
                     {
-                        if (!FileHelper.DeleteFile(destFile))
-                            continue; // Impossible to delete the file, we go to the next texture
+                        if (System.IO.File.Exists(destFile)) // The destination file already exists, we need to delete it
+                        {
+                            if (!FileUtilsShared.TryDeleteFile(destFile))
+                                continue; // Impossible to delete the file, we go to the next texture
+                        }
+                        FileUtilsShared.TryCopyFile(srcFile, destFile);
                     }
-                    FileHelper.CopyFile(srcFile, destFile);
                 }
+                   
             }
             return true;
+        }
+
+        /// <summary>
+        /// Try to delete all groups that use textures from a given list (compare the textures)
+        /// </summary>
+        /// <param name="objData">Data parsed from the obj file</param>
+        /// <param name="mtlData">Data parsed from the mtl file</param>
+        /// <param name="listFileName">List of textures that should be matched</param>
+        /// <returns>true if successful, false if error</returns>
+        public static bool TryDeleteMatchingGroups(ObjData objData, MtlData mtlData, List<string> listFileName)
+        {
+            try
+            {
+                return DeleteMatchingGroups(objData, mtlData, listFileName);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -494,7 +524,7 @@ namespace N64Library.Tool.ObjFiles
 
             List<BitmapStoreData> imgList = BitmapStoreData.GetListBitmapStoreData(listFileName);
 
-            var tupleTextureMaterials = MtlHelper.GetTupleDictTextureMaterials(mtlData);
+            var tupleTextureMaterials = MtlUtils.GetTupleDictTextureMaterials(mtlData);
 
             // Dictionary that associate every texture to a list of materials
             Dictionary<string, List<int>> dictTextureMaterials = tupleTextureMaterials.Item1;
@@ -502,16 +532,16 @@ namespace N64Library.Tool.ObjFiles
             List<int> untexturedMaterials = tupleTextureMaterials.Item2;
 
             // Dictionary that associate every material to a list of groups
-            Dictionary<string, List<int>> dictMaterialGroups = ObjHelper.GetDictMaterialGroups(objData);
+            Dictionary<string, List<int>> dictMaterialGroups = ObjUtils.GetDictMaterialGroups(objData);
 
             // Dictionary that associate every texture to a list of groups
-            Dictionary<string, List<int>> dictTextureGroups = ObjHelper.GetDictTextureGroups(objData, mtlData,
+            Dictionary<string, List<int>> dictTextureGroups = ObjUtils.GetDictTextureGroups(objData, mtlData,
                 dictTextureMaterials, dictMaterialGroups);
             
             List<ObjectObj> newObjectsList = new List<ObjectObj>();
             List<MaterialMtl> newMaterialsList = new List<MaterialMtl>();
 
-            string srcDir = FileHelper.GetDirectoryName(mtlData.FilePath);
+            string srcDir = System.IO.Path.GetDirectoryName(mtlData.FilePath);
 
             foreach (KeyValuePair<string, List<int>> keyValue in dictTextureGroups)
             {
@@ -522,16 +552,16 @@ namespace N64Library.Tool.ObjFiles
                     {
                         string texturePath = keyValue.Key;
                         
-                        if (!FileHelper.IsPathRooted(texturePath)) // Not an absolute path
-                            texturePath = FileHelper.Combine(srcDir, texturePath);
+                        if (!System.IO.Path.IsPathRooted(texturePath)) // Not an absolute path
+                            texturePath = System.IO.Path.Combine(srcDir, texturePath);
                         
-                        System.Drawing.Bitmap img = ImageHelper.CreateBitmap(texturePath);
+                        System.Drawing.Bitmap img = ImageUtilsShared.CreateBitmap(texturePath);
                         if (img != null)
                         {
                             BitmapStoreData bmpData = new BitmapStoreData(img);
                             if (bmpData.BData != null)
                             {
-                                if (!ImageHelper.SamePictures(imgList, bmpData)) // Not the same image
+                                if (!ImageUtilsShared.SamePictures(imgList, bmpData)) // Not the same image
                                 {
                                     // We can keep all these groups and materials
 
@@ -590,29 +620,32 @@ namespace N64Library.Tool.ObjFiles
         /// <returns></returns>
         public static ObjData MergeObjFiles(List<ObjData> objFiles)
         {
-            int length = objFiles.Count;
-            if (length >= 1) // Should always be the case
+            if (objFiles != null)
             {
-                ObjData objData = objFiles[0];
-
-                if (length == 1) // Only one objData
+                int length = objFiles.Count;
+                if (length >= 1) // Should always be the case
                 {
-                    return objData;
-                }
-                else // More objData to merge with the first one
-                {
-                    IntWrapper indexMaterial = new IntWrapper(0);
-                    // Rename every materials to be unique
-                    SetUniqueMaterialsNames(objData, objData.Mtl, indexMaterial);
+                    ObjData objData = objFiles[0];
 
-                    for (int i = 1; i < length; i++)
+                    if (length == 1) // Only one objData
                     {
-                        ObjData nextObjData = objFiles[i];
-                        SetUniqueMaterialsNames(nextObjData, nextObjData.Mtl, indexMaterial);
-                        objData.MergeObjData(nextObjData);
-
+                        return objData;
                     }
-                    return objData;
+                    else // More objData to merge with the first one
+                    {
+                        IntWrapper indexMaterial = new IntWrapper(0);
+                        // Rename every materials to be unique
+                        SetUniqueMaterialsNames(objData, objData.Mtl, indexMaterial);
+
+                        for (int i = 1; i < length; i++)
+                        {
+                            ObjData nextObjData = objFiles[i];
+                            SetUniqueMaterialsNames(nextObjData, nextObjData.Mtl, indexMaterial);
+                            objData.MergeObjData(nextObjData);
+
+                        }
+                        return objData;
+                    }
                 }
             }
             return null;
@@ -627,7 +660,7 @@ namespace N64Library.Tool.ObjFiles
         private static void SetUniqueMaterialsNames(ObjData objData, MtlData mtlData, IntWrapper indexMaterial)
         {
             // Dictionary that associate every material to a list of groups
-            Dictionary<string, List<int>> dictMaterialGroups = ObjHelper.GetDictMaterialGroups(objData);
+            Dictionary<string, List<int>> dictMaterialGroups = ObjUtils.GetDictMaterialGroups(objData);
 
             if (mtlData == null) // Need to rename the Materials in obj only
             {
@@ -640,7 +673,7 @@ namespace N64Library.Tool.ObjFiles
             else // Need to rename the Materials in both obj and mtl
             {
                 // Dictionary that associate every material of the mtl file to their index
-                Dictionary<string, int> dictMaterialIndex = MtlHelper.GetDictMaterialIndex(mtlData);
+                Dictionary<string, int> dictMaterialIndex = MtlUtils.GetDictMaterialIndex(mtlData);
 
                 foreach (KeyValuePair<string, List<int>> keyValue in dictMaterialGroups)
                 {
@@ -651,7 +684,7 @@ namespace N64Library.Tool.ObjFiles
                         MaterialMtl materialMtl = mtlData.MaterialsList[index];
                         if (materialMtl.NewMtl != null)
                         {
-                            materialMtl.NewMtl = Helper.MergeIndexStr(indexMaterial.Value, materialMtl.NewMtl);
+                            materialMtl.NewMtl = GenericUtils.MergeIndexStr(indexMaterial.Value, materialMtl.NewMtl);
                         }
                     }
                     indexMaterial.Value++;
@@ -676,7 +709,7 @@ namespace N64Library.Tool.ObjFiles
                 }
                 if (objectObj.MaterialName != null)
                 {
-                    objectObj.MaterialName = Helper.MergeIndexStr(indexMaterial.Value, objectObj.MaterialName);
+                    objectObj.MaterialName = GenericUtils.MergeIndexStr(indexMaterial.Value, objectObj.MaterialName);
                 }
             }
         }

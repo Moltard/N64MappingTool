@@ -42,26 +42,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tool\ObjFiles\MtlData.cs" />
-    <Compile Include="Tool\ObjFiles\MtlExporter.cs" />
-    <Compile Include="Tool\ObjFiles\MtlParser.cs" />
-    <Compile Include="Tool\ObjFiles\ObjData.cs" />
-    <Compile Include="Tool\ObjFiles\ObjExporter.cs" />
-    <Compile Include="Tool\ObjFiles\ObjModifier.cs" />
-    <Compile Include="Tool\ObjFiles\ObjParser.cs" />
-    <Compile Include="Tool\SmdFiles\SmdExporter.cs" />
-    <Compile Include="Tool\Utils\FileHelpers.cs" />
-    <Compile Include="Tool\Utils\GenericData.cs" />
-    <Compile Include="Tool\Utils\Helpers.cs" />
-    <Compile Include="Tool\Utils\ImageHelpers.cs" />
+    <Compile Include="Tool\Data\MtlData.cs" />
+    <Compile Include="Tool\Data\ObjData.cs" />
+    <Compile Include="Tool\Data\WrlData.cs" />
+    <Compile Include="Tool\Exporter\MtlExporter.cs" />
+    <Compile Include="Tool\Exporter\ObjExporter.cs" />
+    <Compile Include="Tool\Parser\MtlParser.cs" />
+    <Compile Include="Tool\Modifier\ObjModifier.cs" />
+    <Compile Include="Tool\Parser\ObjParser.cs" />
+    <Compile Include="Tool\Exporter\SmdExporter.cs" />
+    <Compile Include="Tool\Utils\FileUtilsShared.cs" />
+    <Compile Include="Tool\Data\GenericData.cs" />
+    <Compile Include="Tool\Utils\GenericUtils.cs" />
+    <Compile Include="Tool\Utils\ImageUtilsShared.cs" />
+    <Compile Include="Tool\Utils\MtlUtils.cs" />
     <Compile Include="Tool\Utils\ObjUtils.cs" />
     <Compile Include="Tool\Utils\SmdUtils.cs" />
-    <Compile Include="Tool\WrlFiles\WrlData.cs" />
-    <Compile Include="Tool\WrlFiles\WrlExporter.cs" />
-    <Compile Include="Tool\WrlFiles\WrlModifier.cs" />
-    <Compile Include="Tool\WrlFiles\WrlParser.cs" />
+    <Compile Include="Tool\Exporter\WrlExporter.cs" />
+    <Compile Include="Tool\Modifier\WrlModifier.cs" />
+    <Compile Include="Tool\Parser\WrlParser.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
